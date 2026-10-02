@@ -13,8 +13,9 @@ export const freshSave = () => ({
   version: 1,
   coins: 150,
   hints: 3,
-  auto: 2,
-  freeze: 2,
+  economy: 2,
+  auto: 0,
+  freeze: 0,
   theme: "studio",
   owned: ["studio"],
   completed: {},
@@ -111,7 +112,20 @@ export function loadSave(storage = localStorage) {
     const raw = storage.getItem(SAVE_KEY);
     if (!raw) return freshSave();
     const parsed = JSON.parse(raw);
-    if (validateSave(parsed)) return parsed;
+    if (validateSave(parsed)) {
+      // Refund retired helpers once. Purchases, coins and completed slots survive.
+      if (parsed.economy !== 2) {
+        parsed.coins = Math.min(
+          1000000,
+          parsed.coins + parsed.auto * 40 + parsed.freeze * 20,
+        );
+        parsed.auto = 0;
+        parsed.freeze = 0;
+        parsed.economy = 2;
+        saveData(parsed, storage);
+      }
+      return parsed;
+    }
     storage.setItem(SAVE_KEY + ".damaged", raw);
   } catch {}
   return freshSave();
@@ -167,8 +181,6 @@ export function claimDaily(save, day = dayKey()) {
 export function buy(save, item) {
   const offers = {
     hint: { price: 90, key: "hints", count: 5 },
-    auto: { price: 120, key: "auto", count: 3 },
-    freeze: { price: 60, key: "freeze", count: 3 },
   };
   if (offers[item]) {
     const o = offers[item];

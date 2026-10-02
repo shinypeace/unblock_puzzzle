@@ -38,6 +38,10 @@ test("420 campaign + 240 bonus boards: valid, unique, legal solutions, optimal p
   }
 });
 test("campaign gets harder across seven chapters", () => {
+  assert.equal(data.campaign[12].par, 6);
+  assert.equal(data.campaign.filter((l) => l.par < 6).length, 12);
+  for (let i = 1; i < data.campaign.length; i++)
+    assert.ok(data.campaign[i].par >= data.campaign[i - 1].par);
   const means = [];
   for (let i = 0; i < 7; i++) {
     const levels = data.campaign.slice(i * 60, i * 60 + 60);

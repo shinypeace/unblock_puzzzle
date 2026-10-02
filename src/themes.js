@@ -23,7 +23,7 @@ export const themes = [
     id: "grove",
     name: "Автопарк",
     tag: "Большой выезд",
-    price: 240,
+    price: 1400,
     colors: [
       "#1d262b",
       "#343b40",
@@ -42,7 +42,7 @@ export const themes = [
     id: "tide",
     name: "Глубина",
     tag: "Подводная экспедиция",
-    price: 480,
+    price: 2400,
     colors: [
       "#d7f0eb",
       "#efffef",
@@ -61,7 +61,7 @@ export const themes = [
     id: "ink",
     name: "Кондитерская",
     tag: "Сладкий ход",
-    price: 720,
+    price: 3600,
     colors: [
       "#fbebdf",
       "#fff0d4",
@@ -80,7 +80,7 @@ export const themes = [
     id: "orbit",
     name: "Неон",
     tag: "Заряд на максимум",
-    price: 960,
+    price: 5200,
     colors: [
       "#070c19",
       "#091625",

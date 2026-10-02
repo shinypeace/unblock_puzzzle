@@ -112,7 +112,8 @@ function makeLevel() {
   return { blocks: result, par, solution: path };
 }
 let attempts = 0;
-const capacities = [58, 60, 60, 60, 60, 60, 60],
+// Twelve onboarding puzzles including the two tutorials; level 13 needs six moves.
+const capacities = [10, 66, 70, 70, 70, 70, 62],
   reserves = [50, 50, 50, 40, 20, 20, 10],
   buckets = capacities.map(() => []);
 const bucket = (par) =>
@@ -156,7 +157,7 @@ for (let i = 0; i < buckets.length; i++) {
 }
 campaign.sort((a, b) => a.par - b.par);
 const output = {
-  version: 1,
+  version: 2,
   seed: 20261001,
   campaign: campaign.map((l, i) => ({ ...l, id: i + 1 })),
   extra: extra.map((l, i) => ({ ...l, id: 1001 + i })),

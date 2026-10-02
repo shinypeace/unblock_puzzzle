@@ -103,7 +103,8 @@ test("locked themes conceal art; settings stay compact; desktop keeps phone widt
 }) => {
   await page.goto("/");
   await page.locator('[data-action="nav:shop"]').first().click();
-  await expect(page.locator(".mystery-cover")).toHaveCount(4);
+  await page.locator('[data-action="theme-page:1"]').click();
+  await expect(page.locator(".mystery-cover")).toHaveCount(1);
   await expect(page.getByText("Автопарк", { exact: true })).toHaveCount(0);
   await expect(page.locator('img[src*="art/grove/"]')).toHaveCount(0);
   await page.locator('[data-action="settings"]').click();

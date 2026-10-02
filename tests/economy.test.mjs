@@ -33,11 +33,11 @@ test("purchases are atomic and owned themes cannot be charged twice", () => {
   assert.equal(s.hints, 8);
   assert.equal(s.coins, 60);
   assert.equal(buy(s, "hint"), false);
-  s.coins = 1000;
+  s.coins = 2000;
   assert.equal(buy(s, "grove"), true);
-  assert.equal(s.coins, 760);
+  assert.equal(s.coins, 600);
   assert.equal(buy(s, "grove"), false);
-  assert.equal(s.coins, 760);
+  assert.equal(s.coins, 600);
   assert.equal(buy(s, "bogus"), false);
 });
 test("daily rewards require all puzzles, pay once, increment/reset streak", () => {
@@ -100,4 +100,41 @@ test("save validation and corrupted-storage recovery", () => {
     storage.get(SAVE_KEY + ".damaged"),
     JSON.stringify({ version: 1 }),
   );
+});
+
+test("legacy helper refund preserves purchases and happens only once", () => {
+  const old = {
+    ...freshSave(),
+    auto: 3,
+    freeze: 2,
+    owned: ["studio", "grove"],
+    theme: "grove",
+    completed: { 1: { stars: 3, moves: 2 } },
+  };
+  delete old.economy;
+  let raw = JSON.stringify(old);
+  const storage = {
+    getItem: () => raw,
+    setItem: (_, v) => {
+      raw = v;
+    },
+  };
+  const migrated = loadSave(storage);
+  assert.equal(migrated.coins, 310);
+  assert.equal(migrated.auto, 0);
+  assert.equal(migrated.freeze, 0);
+  assert.deepEqual(migrated.owned, old.owned);
+  assert.deepEqual(migrated.completed, old.completed);
+  assert.deepEqual(loadSave(storage), migrated);
+  assert.equal(buy(migrated, "auto"), false);
+  assert.equal(buy(migrated, "freeze"), false);
+});
+
+test("fifty perfect campaign levels cannot buy the entire theme collection", () => {
+  const s = freshSave();
+  for (const l of data.campaign.slice(0, 50)) completeCampaign(s, l, l.par, 0);
+  for (const id of ["first", "ten", "perfect"]) claimAchievement(s, id);
+  assert.ok(buy(s, "grove"));
+  for (const id of ["tide", "ink", "orbit"]) assert.equal(buy(s, id), false);
+  assert.equal(s.owned.length, 2);
 });

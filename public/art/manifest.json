@@ -1,5 +1,5 @@
 {
-  "version": 2,
+  "version": 3,
   "themes": {
     "studio": {
       "width": 1254,
@@ -827,5 +827,97 @@
       "column": 5,
       "row": 5
     }
+  },
+  "surfaces": {
+    "source": "art/source/board-surfaces.png",
+    "columns": 2,
+    "rows": 5,
+    "regions": [
+      {
+        "left": 29,
+        "top": 17,
+        "width": 374,
+        "height": 357
+      },
+      {
+        "left": 462,
+        "top": 59,
+        "width": 290,
+        "height": 286
+      },
+      {
+        "left": 29,
+        "top": 398,
+        "width": 373,
+        "height": 357
+      },
+      {
+        "left": 461,
+        "top": 432,
+        "width": 292,
+        "height": 295
+      },
+      {
+        "left": 29,
+        "top": 773,
+        "width": 373,
+        "height": 358
+      },
+      {
+        "left": 463,
+        "top": 816,
+        "width": 287,
+        "height": 287
+      },
+      {
+        "left": 30,
+        "top": 1152,
+        "width": 373,
+        "height": 355
+      },
+      {
+        "left": 462,
+        "top": 1190,
+        "width": 288,
+        "height": 289
+      },
+      {
+        "left": 21,
+        "top": 1529,
+        "width": 387,
+        "height": 365
+      },
+      {
+        "left": 461,
+        "top": 1568,
+        "width": 289,
+        "height": 291
+      }
+    ],
+    "frameSize": 384,
+    "cellSize": 96,
+    "boardInset": 30,
+    "frameWidth": 28
+  },
+  "overrides": {
+    "source": "art/source/orange-blocks.png",
+    "regions": [
+      {
+        "left": 389,
+        "top": 6,
+        "width": 1015,
+        "height": 431
+      },
+      {
+        "left": 8,
+        "top": 444,
+        "width": 1776,
+        "height": 414
+      }
+    ],
+    "sprites": [
+      "orbit/short-0",
+      "orbit/long-0"
+    ]
   }
 }
