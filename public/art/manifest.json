@@ -1,0 +1,831 @@
+{
+  "version": 2,
+  "themes": {
+    "studio": {
+      "width": 1254,
+      "height": 1254,
+      "columns": 4,
+      "rows": 4,
+      "entries": {
+        "target": {
+          "column": 0,
+          "row": 0,
+          "left": 42,
+          "top": 93,
+          "width": 270,
+          "height": 149
+        },
+        "short-0": {
+          "column": 1,
+          "row": 0,
+          "left": 344,
+          "top": 93,
+          "width": 269,
+          "height": 148
+        },
+        "short-1": {
+          "column": 2,
+          "row": 0,
+          "left": 642,
+          "top": 93,
+          "width": 268,
+          "height": 148
+        },
+        "short-2": {
+          "column": 3,
+          "row": 0,
+          "left": 942,
+          "top": 93,
+          "width": 271,
+          "height": 148
+        },
+        "long-0": {
+          "column": 0,
+          "row": 1,
+          "left": 42,
+          "top": 401,
+          "width": 280,
+          "height": 114
+        },
+        "long-1": {
+          "column": 1,
+          "row": 1,
+          "left": 343,
+          "top": 401,
+          "width": 280,
+          "height": 114
+        },
+        "long-2": {
+          "column": 2,
+          "row": 1,
+          "left": 646,
+          "top": 401,
+          "width": 279,
+          "height": 114
+        },
+        "board": {
+          "column": 3,
+          "row": 1,
+          "left": 956,
+          "top": 312,
+          "width": 266,
+          "height": 272
+        },
+        "primary": {
+          "column": 0,
+          "row": 2,
+          "left": 29,
+          "top": 712,
+          "width": 313,
+          "height": 137
+        },
+        "secondary": {
+          "column": 1,
+          "row": 2,
+          "left": 358,
+          "top": 714,
+          "width": 301,
+          "height": 134
+        },
+        "round": {
+          "column": 2,
+          "row": 2,
+          "left": 689,
+          "top": 676,
+          "width": 211,
+          "height": 204
+        },
+        "panel": {
+          "column": 3,
+          "row": 2,
+          "left": 951,
+          "top": 631,
+          "width": 280,
+          "height": 261
+        },
+        "tab-on": {
+          "column": 0,
+          "row": 3,
+          "left": 37,
+          "top": 978,
+          "width": 293,
+          "height": 165
+        },
+        "tab-off": {
+          "column": 1,
+          "row": 3,
+          "left": 354,
+          "top": 981,
+          "width": 294,
+          "height": 162
+        },
+        "tile": {
+          "column": 2,
+          "row": 3,
+          "left": 685,
+          "top": 948,
+          "width": 221,
+          "height": 219
+        },
+        "chest": {
+          "column": 3,
+          "row": 3,
+          "left": 957,
+          "top": 937,
+          "width": 272,
+          "height": 236
+        }
+      }
+    },
+    "grove": {
+      "width": 1254,
+      "height": 1254,
+      "columns": 4,
+      "rows": 4,
+      "entries": {
+        "target": {
+          "column": 0,
+          "row": 0,
+          "left": 30,
+          "top": 85,
+          "width": 282,
+          "height": 158
+        },
+        "short-0": {
+          "column": 1,
+          "row": 0,
+          "left": 340,
+          "top": 84,
+          "width": 276,
+          "height": 161
+        },
+        "short-1": {
+          "column": 2,
+          "row": 0,
+          "left": 643,
+          "top": 82,
+          "width": 277,
+          "height": 166
+        },
+        "short-2": {
+          "column": 3,
+          "row": 0,
+          "left": 954,
+          "top": 81,
+          "width": 273,
+          "height": 166
+        },
+        "long-0": {
+          "column": 0,
+          "row": 1,
+          "left": 20,
+          "top": 395,
+          "width": 286,
+          "height": 143
+        },
+        "long-1": {
+          "column": 1,
+          "row": 1,
+          "left": 324,
+          "top": 397,
+          "width": 297,
+          "height": 140
+        },
+        "long-2": {
+          "column": 2,
+          "row": 1,
+          "left": 638,
+          "top": 395,
+          "width": 300,
+          "height": 147
+        },
+        "board": {
+          "column": 3,
+          "row": 1,
+          "left": 954,
+          "top": 320,
+          "width": 281,
+          "height": 281
+        },
+        "primary": {
+          "column": 0,
+          "row": 2,
+          "left": 22,
+          "top": 716,
+          "width": 306,
+          "height": 125
+        },
+        "secondary": {
+          "column": 1,
+          "row": 2,
+          "left": 337,
+          "top": 717,
+          "width": 301,
+          "height": 125
+        },
+        "round": {
+          "column": 2,
+          "row": 2,
+          "left": 676,
+          "top": 672,
+          "width": 211,
+          "height": 210
+        },
+        "panel": {
+          "column": 3,
+          "row": 2,
+          "left": 947,
+          "top": 631,
+          "width": 284,
+          "height": 266
+        },
+        "tab-on": {
+          "column": 0,
+          "row": 3,
+          "left": 25,
+          "top": 993,
+          "width": 292,
+          "height": 124
+        },
+        "tab-off": {
+          "column": 1,
+          "row": 3,
+          "left": 338,
+          "top": 991,
+          "width": 294,
+          "height": 125
+        },
+        "tile": {
+          "column": 2,
+          "row": 3,
+          "left": 672,
+          "top": 947,
+          "width": 222,
+          "height": 216
+        },
+        "chest": {
+          "column": 3,
+          "row": 3,
+          "left": 966,
+          "top": 937,
+          "width": 249,
+          "height": 239
+        }
+      }
+    },
+    "tide": {
+      "width": 1254,
+      "height": 1254,
+      "columns": 4,
+      "rows": 4,
+      "entries": {
+        "target": {
+          "column": 0,
+          "row": 0,
+          "left": 28,
+          "top": 94,
+          "width": 283,
+          "height": 183
+        },
+        "short-0": {
+          "column": 1,
+          "row": 0,
+          "left": 335,
+          "top": 93,
+          "width": 278,
+          "height": 184
+        },
+        "short-1": {
+          "column": 2,
+          "row": 0,
+          "left": 641,
+          "top": 92,
+          "width": 284,
+          "height": 186
+        },
+        "short-2": {
+          "column": 3,
+          "row": 0,
+          "left": 953,
+          "top": 93,
+          "width": 280,
+          "height": 184
+        },
+        "long-0": {
+          "column": 0,
+          "row": 1,
+          "left": 15,
+          "top": 412,
+          "width": 302,
+          "height": 153
+        },
+        "long-1": {
+          "column": 1,
+          "row": 1,
+          "left": 331,
+          "top": 412,
+          "width": 298,
+          "height": 154
+        },
+        "long-2": {
+          "column": 2,
+          "row": 1,
+          "left": 640,
+          "top": 412,
+          "width": 298,
+          "height": 153
+        },
+        "board": {
+          "column": 3,
+          "row": 1,
+          "left": 946,
+          "top": 318,
+          "width": 288,
+          "height": 282
+        },
+        "primary": {
+          "column": 0,
+          "row": 2,
+          "left": 20,
+          "top": 714,
+          "width": 318,
+          "height": 148
+        },
+        "secondary": {
+          "column": 1,
+          "row": 2,
+          "left": 346,
+          "top": 718,
+          "width": 321,
+          "height": 138
+        },
+        "round": {
+          "column": 2,
+          "row": 2,
+          "left": 682,
+          "top": 664,
+          "width": 227,
+          "height": 225
+        },
+        "panel": {
+          "column": 3,
+          "row": 2,
+          "left": 938,
+          "top": 621,
+          "width": 296,
+          "height": 296
+        },
+        "tab-on": {
+          "column": 0,
+          "row": 3,
+          "left": 20,
+          "top": 992,
+          "width": 322,
+          "height": 151
+        },
+        "tab-off": {
+          "column": 1,
+          "row": 3,
+          "left": 350,
+          "top": 995,
+          "width": 306,
+          "height": 146
+        },
+        "tile": {
+          "column": 2,
+          "row": 3,
+          "left": 688,
+          "top": 965,
+          "width": 214,
+          "height": 215
+        },
+        "chest": {
+          "column": 3,
+          "row": 3,
+          "left": 944,
+          "top": 936,
+          "width": 284,
+          "height": 266
+        }
+      }
+    },
+    "ink": {
+      "width": 1254,
+      "height": 1254,
+      "columns": 4,
+      "rows": 4,
+      "entries": {
+        "target": {
+          "column": 0,
+          "row": 0,
+          "left": 13,
+          "top": 113,
+          "width": 287,
+          "height": 152
+        },
+        "short-0": {
+          "column": 1,
+          "row": 0,
+          "left": 327,
+          "top": 114,
+          "width": 290,
+          "height": 151
+        },
+        "short-1": {
+          "column": 2,
+          "row": 0,
+          "left": 643,
+          "top": 114,
+          "width": 289,
+          "height": 151
+        },
+        "short-2": {
+          "column": 3,
+          "row": 0,
+          "left": 959,
+          "top": 115,
+          "width": 289,
+          "height": 150
+        },
+        "long-0": {
+          "column": 0,
+          "row": 1,
+          "left": 10,
+          "top": 429,
+          "width": 298,
+          "height": 99
+        },
+        "long-1": {
+          "column": 1,
+          "row": 1,
+          "left": 323,
+          "top": 430,
+          "width": 298,
+          "height": 97
+        },
+        "long-2": {
+          "column": 2,
+          "row": 1,
+          "left": 639,
+          "top": 431,
+          "width": 306,
+          "height": 95
+        },
+        "board": {
+          "column": 3,
+          "row": 1,
+          "left": 964,
+          "top": 323,
+          "width": 277,
+          "height": 278
+        },
+        "primary": {
+          "column": 0,
+          "row": 2,
+          "left": 19,
+          "top": 710,
+          "width": 315,
+          "height": 145
+        },
+        "secondary": {
+          "column": 1,
+          "row": 2,
+          "left": 341,
+          "top": 706,
+          "width": 323,
+          "height": 143
+        },
+        "round": {
+          "column": 2,
+          "row": 2,
+          "left": 693,
+          "top": 670,
+          "width": 219,
+          "height": 216
+        },
+        "panel": {
+          "column": 3,
+          "row": 2,
+          "left": 954,
+          "top": 618,
+          "width": 289,
+          "height": 280
+        },
+        "tab-on": {
+          "column": 0,
+          "row": 3,
+          "left": 14,
+          "top": 991,
+          "width": 321,
+          "height": 159
+        },
+        "tab-off": {
+          "column": 1,
+          "row": 3,
+          "left": 343,
+          "top": 991,
+          "width": 317,
+          "height": 157
+        },
+        "tile": {
+          "column": 2,
+          "row": 3,
+          "left": 691,
+          "top": 968,
+          "width": 212,
+          "height": 209
+        },
+        "chest": {
+          "column": 3,
+          "row": 3,
+          "left": 962,
+          "top": 930,
+          "width": 280,
+          "height": 264
+        }
+      }
+    },
+    "orbit": {
+      "width": 1254,
+      "height": 1254,
+      "columns": 4,
+      "rows": 4,
+      "entries": {
+        "target": {
+          "column": 0,
+          "row": 0,
+          "left": 19,
+          "top": 92,
+          "width": 287,
+          "height": 140
+        },
+        "short-0": {
+          "column": 1,
+          "row": 0,
+          "left": 331,
+          "top": 92,
+          "width": 286,
+          "height": 140
+        },
+        "short-1": {
+          "column": 2,
+          "row": 0,
+          "left": 639,
+          "top": 92,
+          "width": 287,
+          "height": 140
+        },
+        "short-2": {
+          "column": 3,
+          "row": 0,
+          "left": 946,
+          "top": 92,
+          "width": 290,
+          "height": 140
+        },
+        "long-0": {
+          "column": 0,
+          "row": 1,
+          "left": 18,
+          "top": 422,
+          "width": 291,
+          "height": 93
+        },
+        "long-1": {
+          "column": 1,
+          "row": 1,
+          "left": 326,
+          "top": 421,
+          "width": 293,
+          "height": 94
+        },
+        "long-2": {
+          "column": 2,
+          "row": 1,
+          "left": 636,
+          "top": 421,
+          "width": 294,
+          "height": 94
+        },
+        "board": {
+          "column": 3,
+          "row": 1,
+          "left": 949,
+          "top": 320,
+          "width": 281,
+          "height": 284
+        },
+        "primary": {
+          "column": 0,
+          "row": 2,
+          "left": 24,
+          "top": 714,
+          "width": 291,
+          "height": 125
+        },
+        "secondary": {
+          "column": 1,
+          "row": 2,
+          "left": 338,
+          "top": 714,
+          "width": 292,
+          "height": 127
+        },
+        "round": {
+          "column": 2,
+          "row": 2,
+          "left": 674,
+          "top": 675,
+          "width": 209,
+          "height": 206
+        },
+        "panel": {
+          "column": 3,
+          "row": 2,
+          "left": 943,
+          "top": 634,
+          "width": 294,
+          "height": 276
+        },
+        "tab-on": {
+          "column": 0,
+          "row": 3,
+          "left": 26,
+          "top": 1004,
+          "width": 289,
+          "height": 132
+        },
+        "tab-off": {
+          "column": 1,
+          "row": 3,
+          "left": 335,
+          "top": 1004,
+          "width": 295,
+          "height": 133
+        },
+        "tile": {
+          "column": 2,
+          "row": 3,
+          "left": 681,
+          "top": 975,
+          "width": 201,
+          "height": 201
+        },
+        "chest": {
+          "column": 3,
+          "row": 3,
+          "left": 945,
+          "top": 945,
+          "width": 282,
+          "height": 259
+        }
+      }
+    }
+  },
+  "icons": {
+    "coin": {
+      "column": 0,
+      "row": 0
+    },
+    "star": {
+      "column": 1,
+      "row": 0
+    },
+    "trophy": {
+      "column": 2,
+      "row": 0
+    },
+    "settings": {
+      "column": 3,
+      "row": 0
+    },
+    "hint": {
+      "column": 4,
+      "row": 0
+    },
+    "undo": {
+      "column": 5,
+      "row": 0
+    },
+    "restart": {
+      "column": 0,
+      "row": 1
+    },
+    "arrow": {
+      "column": 1,
+      "row": 1
+    },
+    "back": {
+      "column": 2,
+      "row": 1
+    },
+    "chevron": {
+      "column": 3,
+      "row": 1
+    },
+    "play": {
+      "column": 4,
+      "row": 1
+    },
+    "pause": {
+      "column": 5,
+      "row": 1
+    },
+    "grid": {
+      "column": 0,
+      "row": 2
+    },
+    "sun": {
+      "column": 1,
+      "row": 2
+    },
+    "infinity": {
+      "column": 2,
+      "row": 2
+    },
+    "shop": {
+      "column": 3,
+      "row": 2
+    },
+    "leaf": {
+      "column": 4,
+      "row": 2
+    },
+    "bolt": {
+      "column": 5,
+      "row": 2
+    },
+    "close": {
+      "column": 0,
+      "row": 3
+    },
+    "check": {
+      "column": 1,
+      "row": 3
+    },
+    "lock": {
+      "column": 2,
+      "row": 3
+    },
+    "clock": {
+      "column": 3,
+      "row": 3
+    },
+    "sound": {
+      "column": 4,
+      "row": 3
+    },
+    "mute": {
+      "column": 5,
+      "row": 3
+    },
+    "download": {
+      "column": 0,
+      "row": 4
+    },
+    "upload": {
+      "column": 1,
+      "row": 4
+    },
+    "help": {
+      "column": 2,
+      "row": 4
+    },
+    "flame": {
+      "column": 3,
+      "row": 4
+    },
+    "gift": {
+      "column": 4,
+      "row": 4
+    },
+    "spark": {
+      "column": 5,
+      "row": 4
+    },
+    "palette": {
+      "column": 0,
+      "row": 5
+    },
+    "snow": {
+      "column": 1,
+      "row": 5
+    },
+    "heart": {
+      "column": 2,
+      "row": 5
+    },
+    "logo": {
+      "column": 3,
+      "row": 5
+    },
+    "toggle-on": {
+      "column": 4,
+      "row": 5
+    },
+    "toggle-off": {
+      "column": 5,
+      "row": 5
+    }
+  }
+}

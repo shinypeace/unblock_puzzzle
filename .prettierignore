@@ -1,0 +1,7 @@
+src/data/levels.json
+public/assets/
+public/licenses/
+dist/
+node_modules/
+.local/
+test-results/

@@ -1,0 +1,37 @@
+{
+  "id": "./",
+  "name": "Сдвиг — unblock puzzle",
+  "short_name": "Сдвиг",
+  "lang": "ru",
+  "description": "420 головоломок. Каждый день — новый путь.",
+  "start_url": "./",
+  "scope": "./",
+  "display": "standalone",
+  "orientation": "portrait",
+  "background_color": "#e9f3f5",
+  "theme_color": "#e9f3f5",
+  "categories": [
+    "games",
+    "puzzle"
+  ],
+  "icons": [
+    {
+      "src": "icons/icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "icons/icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "icons/maskable-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "maskable"
+    }
+  ]
+}
