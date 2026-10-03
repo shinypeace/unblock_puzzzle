@@ -75,6 +75,10 @@ test("sixty consecutive campaign puzzles keep input and saves working", async ({
         y + (a === "v" ? delta : 0),
       );
       await page.mouse.up();
+      await expect(block, `level ${level.id}, block ${step.i}`).toHaveAttribute(
+        "aria-label",
+        new RegExp("Позиция " + (step.to + 1) + "$"),
+      );
     }
     await expect(page.locator(".win-stats")).toContainText("+44");
     await page.locator('[data-action="next"]').click();

@@ -3,6 +3,45 @@ import { freshSave, SAVE_KEY } from "../../src/store.js";
 import { readFileSync } from "node:fs";
 const data = JSON.parse(readFileSync("src/data/levels.json", "utf8"));
 const themes = ["studio", "grove", "tide", "ink", "orbit"];
+test("first frame is usable before ResizeObserver; its initial notification preserves a drag", async ({
+  page,
+}) => {
+  await page.addInitScript(() => {
+    window.ResizeObserver = class {
+      constructor(callback) {
+        this.callback = callback;
+      }
+      observe(target) {
+        window.delayedResize = () =>
+          this.callback([
+            { target, contentRect: target.getBoundingClientRect() },
+          ]);
+      }
+      disconnect() {}
+    };
+  });
+  await page.goto("/");
+  await page.locator("#board").waitFor();
+  const step = data.campaign[0].solution[0],
+    b = data.campaign[0].blocks[step.i];
+  const board = await page.locator("#board").boundingBox(),
+    block = page.locator('[data-block="' + step.i + '"]'),
+    rect = await block.boundingBox();
+  expect(board.width).toBeGreaterThan(160);
+  expect(rect.width).toBeGreaterThan(20);
+  const x = rect.x + rect.width / 2,
+    y = rect.y + rect.height / 2,
+    delta = ((step.to - b.p) * board.width) / 6;
+  await page.mouse.move(x, y);
+  await page.mouse.down();
+  await page.evaluate(() => window.delayedResize());
+  await page.mouse.move(
+    x + (b.a === "h" ? delta : 0),
+    y + (b.a === "v" ? delta : 0),
+  );
+  await page.mouse.up();
+  await expect(page.locator("#moves")).toHaveText("1");
+});
 for (const theme of themes)
   test(`${theme}: exact cells, static pages and safe panel contents`, async ({
     page,

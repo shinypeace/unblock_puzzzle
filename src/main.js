@@ -55,14 +55,8 @@ let solver = new Worker(new URL("./solver.worker.js", import.meta.url), {
   }),
   requestId = 0;
 const boardObserver = new ResizeObserver((entries) => {
-  cancelDrag();
   for (const { target, contentRect } of entries) {
-    const frame = target.querySelector(".board-frame");
-    if (frame)
-      frame.style.setProperty(
-        "--board-size",
-        Math.floor(Math.min(contentRect.width, contentRect.height)) + "px",
-      );
+    measureBoard(target, contentRect);
   }
 });
 const pausedReasons = new Set();
@@ -735,7 +729,20 @@ function achievementsView() {
 function fitBoard() {
   boardObserver.disconnect();
   const slot = document.querySelector(".board-slot");
-  if (slot) boardObserver.observe(slot);
+  if (slot) {
+    // The first visible frame must already have usable geometry. Observer
+    // delivery is asynchronous and can arrive after the player's first touch.
+    measureBoard(slot, slot.getBoundingClientRect());
+    boardObserver.observe(slot);
+  }
+}
+function measureBoard(slot, rect) {
+  const frame = slot.querySelector(".board-frame");
+  if (!frame) return;
+  const size = Math.floor(Math.min(rect.width, rect.height)) + "px";
+  if (frame.style.getPropertyValue("--board-size") === size) return;
+  cancelDrag();
+  frame.style.setProperty("--board-size", size);
 }
 
 function paintBoard(scope = document) {
