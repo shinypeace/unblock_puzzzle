@@ -89,10 +89,35 @@ for (const [i, name] of ["short-0", "long-0"].entries()) {
   );
 }
 console.log("Packed five frames, five cells and orange neon blocks.");
+const newCellSource = "art/source/new-cells.png";
+const newCells = await regions(newCellSource, 2, 1);
+for (const [i, id] of ["timber", "zenith"].entries()) {
+  await fs.writeFile(
+    `public/art/${id}/frame.webp`,
+    await sharp(`public/art/${id}/board.webp`)
+      .resize(384, 384, { fit: "fill" })
+      .webp({ quality: 95, alphaQuality: 100 })
+      .toBuffer(),
+  );
+  await fs.writeFile(
+    `public/art/${id}/cell.webp`,
+    await sharp(newCellSource)
+      .extract(newCells[i])
+      .resize(96, 96, { fit: "fill" })
+      .webp({ quality: 95, alphaQuality: 100 })
+      .toBuffer(),
+  );
+}
 const manifest = JSON.parse(
   await fs.readFile("public/art/manifest.json", "utf8"),
 );
-manifest.version = 3;
+manifest.version = 4;
+manifest.additionalSurfaces = {
+  source: newCellSource,
+  regions: newCells,
+  themes: ["timber", "zenith"],
+  framesFromAtlas: "board",
+};
 manifest.surfaces = {
   source: file,
   columns: 2,

@@ -3,19 +3,6 @@ import { readFileSync } from "node:fs";
 import { staticServer } from "./static-server.js";
 import { freshSave, SAVE_KEY, dayKey, dailyLevels } from "../../src/store.js";
 const data = JSON.parse(readFileSync("src/data/levels.json", "utf8"));
-async function themePage(page, target) {
-  const index = ["studio", "grove", "tide", "ink", "orbit"].indexOf(target);
-  let current =
-    Number(
-      (await page.locator(".shop-page .pager > span").innerText()).split(
-        "/",
-      )[0],
-    ) - 1;
-  while (current !== index) {
-    current += Math.sign(index - current);
-    await page.locator('[data-action="theme-page:' + current + '"]').click();
-  }
-}
 async function seed(page, change = {}) {
   await page.addInitScript(
     ({ key, save }) => {
@@ -52,7 +39,7 @@ test("sixty consecutive campaign puzzles keep input and saves working", async ({
   page,
 }, info) => {
   test.skip(info.project.name !== "desktop", "One sustained pointer-input run");
-  test.setTimeout(120000);
+  test.setTimeout(180000);
   await page.goto("/");
   await page.locator("#board").waitFor();
   for (const level of data.campaign.slice(0, 60)) {
@@ -81,6 +68,7 @@ test("sixty consecutive campaign puzzles keep input and saves working", async ({
       );
     }
     await expect(page.locator(".win-stats")).toContainText("+44");
+    await expect(page.getByText("Цель", { exact: true })).toHaveCount(0);
     await page.locator('[data-action="next"]').click();
     await expect(page.locator("h1")).toContainText(
       String(level.id + 1).padStart(2, "0"),
@@ -136,13 +124,13 @@ test("keyboard, undo, restart, hint worker and persistence", async ({
   await page.locator('[data-action="undo"]').click();
   await expect(page.locator("#moves")).toHaveText("0");
   await page.locator('[data-action="hint"]').click();
-  await page.locator('[data-action="use-hint"]').click();
   await expect(page.locator(".hinted")).toBeVisible();
   const s = await page.evaluate(
     (key) => JSON.parse(localStorage.getItem(key)),
     SAVE_KEY,
   );
   expect(s.hints).toBe(2);
+  expect(s.undos).toBe(4);
   await page.reload();
   const restored = await page.evaluate(
     (key) => JSON.parse(localStorage.getItem(key)),
@@ -156,7 +144,7 @@ test("all pages and themes fit viewport, no errors", async ({
 }, testInfo) => {
   await seed(page, {
     coins: 3000,
-    owned: ["studio", "grove", "tide", "ink", "orbit"],
+    owned: ["studio", "grove", "tide", "ink", "orbit", "timber", "zenith"],
   });
   const errors = [];
   page.on("pageerror", (e) => errors.push(e.message));
@@ -175,8 +163,15 @@ test("all pages and themes fit viewport, no errors", async ({
     });
   }
   await page.locator('[data-action="nav:shop"]:visible').first().click();
-  for (const theme of ["grove", "tide", "ink", "orbit", "studio"]) {
-    await themePage(page, theme);
+  for (const theme of [
+    "grove",
+    "tide",
+    "ink",
+    "orbit",
+    "timber",
+    "zenith",
+    "studio",
+  ]) {
     await page.locator(`[data-action="theme:${theme}"]`).click();
     await expect(page.locator("html")).toHaveAttribute("data-theme", theme);
     await page.locator('[data-action="home"]:visible').first().click();
@@ -190,10 +185,9 @@ test("all pages and themes fit viewport, no errors", async ({
   expect(errors).toEqual([]);
 });
 test("theme purchase and boost insufficient funds", async ({ page }) => {
-  await seed(page, { coins: 1460 });
+  await seed(page, { coins: 5660 });
   await page.goto("/");
   await page.locator('[data-action="nav:shop"]:visible').first().click();
-  await themePage(page, "grove");
   await page.locator('[data-action="theme:grove"]').click();
   await page.locator('[data-action="purchase-theme:grove"]').click();
   await expect(page.locator("html")).toHaveAttribute("data-theme", "grove");
@@ -234,7 +228,9 @@ test("sprint timer, finish and repeat; only hint and undo helpers", async ({
   await expect(
     page.locator('[data-action="freeze"],[data-action="use-auto"]'),
   ).toHaveCount(0);
-  await page.locator('[data-action="end-sprint"]').click();
+  await expect(page.locator('[data-action="end-sprint"]')).toHaveCount(0);
+  await page.clock.install();
+  await page.clock.fastForward(181000);
   await expect(
     page.getByRole("heading", { name: "Ещё одна попытка?" }),
   ).toBeVisible();

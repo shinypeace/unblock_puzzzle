@@ -134,8 +134,8 @@ export class VKPlatform {
       !this.ready ||
       this.busy ||
       this.hidden() ||
-      this.completed < 3 ||
-      this.now() - this.lastAd < 180000
+      this.completed < 2 ||
+      this.now() - this.lastAd < 120000
     )
       return false;
     this.completed = 0;

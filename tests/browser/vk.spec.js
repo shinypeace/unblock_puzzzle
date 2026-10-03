@@ -1,5 +1,5 @@
 import { test, expect } from "@playwright/test";
-import { SAVE_KEY } from "../../src/store.js";
+import { SAVE_KEY, freshSave } from "../../src/store.js";
 async function bridge(page, result = true) {
   await page.addInitScript((result) => {
     window.vkCalls = [];
@@ -25,6 +25,10 @@ test("VK reserves banner space and rewards a completed video once", async ({
   page,
 }) => {
   await bridge(page);
+  await page.addInitScript(
+    ({ key, save }) => localStorage.setItem(key, JSON.stringify(save)),
+    { key: SAVE_KEY, save: { ...freshSave(), hints: 0 } },
+  );
   await page.goto("/?vk_app_id=1");
   await expect
     .poll(() =>
@@ -42,10 +46,9 @@ test("VK reserves banner space and rewards a completed video once", async ({
   }));
   expect(layout.bottom).toBeLessThanOrEqual(layout.screen - 64 + 1);
   await page.locator('[data-action="hint"]').click();
-  await page.locator('[data-action="reward:hint"]').click();
   await expect(page.locator("#ad-shield")).toBeVisible();
   await page.evaluate(() =>
-    document.querySelector('[data-action="reward:hint"]').click(),
+    document.querySelector('[data-action="hint"]').click(),
   );
   expect(
     await page.evaluate(
@@ -63,17 +66,21 @@ test("VK reserves banner space and rewards a completed video once", async ({
         SAVE_KEY,
       ),
     )
-    .toBe(4);
+    .toBe(0);
+  await expect(page.locator(".hinted")).toBeVisible();
 });
 test("VK cancelled video grants nothing; view pause preserves sprint time", async ({
   page,
 }) => {
   await bridge(page, false);
+  await page.addInitScript(
+    ({ key, save }) => localStorage.setItem(key, JSON.stringify(save)),
+    { key: SAVE_KEY, save: { ...freshSave(), hints: 0 } },
+  );
   await page.goto("/?vk_app_id=1");
   await page.locator('[data-action="nav:modes"]').click();
   await page.locator('[data-action="sprint"]').click();
   await page.locator('[data-action="hint"]').click();
-  await page.locator('[data-action="reward:hint"]').click();
   const deadline = await page.evaluate(
     (key) => JSON.parse(localStorage.getItem(key)).session.deadline,
     SAVE_KEY,
@@ -85,7 +92,7 @@ test("VK cancelled video grants nothing; view pause preserves sprint time", asyn
     (key) => JSON.parse(localStorage.getItem(key)),
     SAVE_KEY,
   );
-  expect(saved.hints).toBe(3);
+  expect(saved.hints).toBe(0);
   expect(saved.session.deadline).toBeGreaterThan(deadline + 300);
   await page.evaluate(() =>
     window.vkListeners.forEach((fn) =>
@@ -103,8 +110,7 @@ test("locked themes conceal art; settings stay compact; desktop keeps phone widt
 }) => {
   await page.goto("/");
   await page.locator('[data-action="nav:shop"]').first().click();
-  await page.locator('[data-action="theme-page:1"]').click();
-  await expect(page.locator(".mystery-cover")).toHaveCount(1);
+  await expect(page.locator(".mystery-cover")).toHaveCount(6);
   await expect(page.getByText("Автопарк", { exact: true })).toHaveCount(0);
   await expect(page.locator('img[src*="art/grove/"]')).toHaveCount(0);
   await page.locator('[data-action="settings"]').click();

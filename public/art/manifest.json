@@ -1,5 +1,5 @@
 {
-  "version": 3,
+  "version": 4,
   "themes": {
     "studio": {
       "width": 1254,
@@ -680,6 +680,278 @@
           "height": 259
         }
       }
+    },
+    "timber": {
+      "width": 1254,
+      "height": 1254,
+      "columns": 4,
+      "rows": 4,
+      "entries": {
+        "target": {
+          "column": 0,
+          "row": 0,
+          "left": 27,
+          "top": 114,
+          "width": 292,
+          "height": 134
+        },
+        "short-0": {
+          "column": 1,
+          "row": 0,
+          "left": 333,
+          "top": 114,
+          "width": 286,
+          "height": 134
+        },
+        "short-1": {
+          "column": 2,
+          "row": 0,
+          "left": 636,
+          "top": 114,
+          "width": 288,
+          "height": 134
+        },
+        "short-2": {
+          "column": 3,
+          "row": 0,
+          "left": 939,
+          "top": 114,
+          "width": 292,
+          "height": 134
+        },
+        "long-0": {
+          "column": 0,
+          "row": 1,
+          "left": 21,
+          "top": 415,
+          "width": 308,
+          "height": 105
+        },
+        "long-1": {
+          "column": 1,
+          "row": 1,
+          "left": 341,
+          "top": 415,
+          "width": 301,
+          "height": 105
+        },
+        "long-2": {
+          "column": 2,
+          "row": 1,
+          "left": 654,
+          "top": 415,
+          "width": 298,
+          "height": 105
+        },
+        "board": {
+          "column": 3,
+          "row": 1,
+          "left": 966,
+          "top": 325,
+          "width": 268,
+          "height": 265
+        },
+        "primary": {
+          "column": 0,
+          "row": 2,
+          "left": 22,
+          "top": 698,
+          "width": 317,
+          "height": 142
+        },
+        "secondary": {
+          "column": 1,
+          "row": 2,
+          "left": 354,
+          "top": 698,
+          "width": 318,
+          "height": 142
+        },
+        "round": {
+          "column": 2,
+          "row": 2,
+          "left": 695,
+          "top": 663,
+          "width": 215,
+          "height": 213
+        },
+        "panel": {
+          "column": 3,
+          "row": 2,
+          "left": 953,
+          "top": 628,
+          "width": 281,
+          "height": 273
+        },
+        "tab-on": {
+          "column": 0,
+          "row": 3,
+          "left": 22,
+          "top": 990,
+          "width": 312,
+          "height": 155
+        },
+        "tab-off": {
+          "column": 1,
+          "row": 3,
+          "left": 345,
+          "top": 990,
+          "width": 318,
+          "height": 155
+        },
+        "tile": {
+          "column": 2,
+          "row": 3,
+          "left": 694,
+          "top": 967,
+          "width": 206,
+          "height": 205
+        },
+        "chest": {
+          "column": 3,
+          "row": 3,
+          "left": 946,
+          "top": 939,
+          "width": 280,
+          "height": 251
+        }
+      }
+    },
+    "zenith": {
+      "width": 1254,
+      "height": 1254,
+      "columns": 4,
+      "rows": 4,
+      "entries": {
+        "target": {
+          "column": 0,
+          "row": 0,
+          "left": 20,
+          "top": 110,
+          "width": 283,
+          "height": 135
+        },
+        "short-0": {
+          "column": 1,
+          "row": 0,
+          "left": 330,
+          "top": 110,
+          "width": 282,
+          "height": 135
+        },
+        "short-1": {
+          "column": 2,
+          "row": 0,
+          "left": 641,
+          "top": 110,
+          "width": 283,
+          "height": 135
+        },
+        "short-2": {
+          "column": 3,
+          "row": 0,
+          "left": 951,
+          "top": 110,
+          "width": 284,
+          "height": 135
+        },
+        "long-0": {
+          "column": 0,
+          "row": 1,
+          "left": 18,
+          "top": 402,
+          "width": 291,
+          "height": 99
+        },
+        "long-1": {
+          "column": 1,
+          "row": 1,
+          "left": 324,
+          "top": 402,
+          "width": 296,
+          "height": 98
+        },
+        "long-2": {
+          "column": 2,
+          "row": 1,
+          "left": 635,
+          "top": 402,
+          "width": 296,
+          "height": 98
+        },
+        "board": {
+          "column": 3,
+          "row": 1,
+          "left": 954,
+          "top": 316,
+          "width": 274,
+          "height": 273
+        },
+        "primary": {
+          "column": 0,
+          "row": 2,
+          "left": 15,
+          "top": 696,
+          "width": 295,
+          "height": 131
+        },
+        "secondary": {
+          "column": 1,
+          "row": 2,
+          "left": 333,
+          "top": 697,
+          "width": 289,
+          "height": 132
+        },
+        "round": {
+          "column": 2,
+          "row": 2,
+          "left": 685,
+          "top": 664,
+          "width": 200,
+          "height": 199
+        },
+        "panel": {
+          "column": 3,
+          "row": 2,
+          "left": 950,
+          "top": 625,
+          "width": 285,
+          "height": 274
+        },
+        "tab-on": {
+          "column": 0,
+          "row": 3,
+          "left": 16,
+          "top": 994,
+          "width": 292,
+          "height": 140
+        },
+        "tab-off": {
+          "column": 1,
+          "row": 3,
+          "left": 327,
+          "top": 995,
+          "width": 289,
+          "height": 137
+        },
+        "tile": {
+          "column": 2,
+          "row": 3,
+          "left": 691,
+          "top": 966,
+          "width": 189,
+          "height": 186
+        },
+        "chest": {
+          "column": 3,
+          "row": 3,
+          "left": 963,
+          "top": 940,
+          "width": 249,
+          "height": 242
+        }
+      }
     }
   },
   "icons": {
@@ -827,6 +1099,28 @@
       "column": 5,
       "row": 5
     }
+  },
+  "additionalSurfaces": {
+    "source": "art/source/new-cells.png",
+    "regions": [
+      {
+        "left": 94,
+        "top": 94,
+        "width": 737,
+        "height": 699
+      },
+      {
+        "left": 944,
+        "top": 94,
+        "width": 736,
+        "height": 699
+      }
+    ],
+    "themes": [
+      "timber",
+      "zenith"
+    ],
+    "framesFromAtlas": "board"
   },
   "surfaces": {
     "source": "art/source/board-surfaces.png",

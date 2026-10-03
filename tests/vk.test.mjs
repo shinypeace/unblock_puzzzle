@@ -58,15 +58,17 @@ test("concurrent requests show only one video and cannot duplicate its reward", 
   assert.equal(vk.busy, false);
   vk.dispose();
 });
-test("interstitial waits for three sufficiently long levels and cooldown", async () => {
+test("interstitial waits for two sufficiently long levels and cooldown", async () => {
   let time = 1000;
   const { vk, calls } = setup(() => ({ result: true }), { now: () => time });
   vk.lastBanner = Infinity;
   vk.completedLevel(14999);
   assert.equal(vk.completed, 0);
-  for (let i = 0; i < 3; i++) vk.completedLevel(15000);
+  for (let i = 0; i < 2; i++) vk.completedLevel(15000);
   assert.equal(await vk.interstitial(), false);
-  time += 180000;
+  time += 119999;
+  assert.equal(await vk.interstitial(), false);
+  time++;
   assert.equal(await vk.interstitial(), true);
   assert.equal(vk.completed, 0);
   assert.deepEqual(calls[0], {

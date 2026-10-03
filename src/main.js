@@ -27,10 +27,17 @@ import {
   completeCampaign,
   claimDaily,
   buy,
+  offers,
   achievements,
   claimAchievement,
 } from "./store.js";
-import { sound, muteAudio } from "./audio.js";
+import {
+  sound,
+  muteAudio,
+  configureAudio,
+  unlockAudio,
+  setAudioEnabled,
+} from "./audio.js";
 import { VKPlatform, connectVK } from "./vk.js";
 
 const app = document.querySelector("#app"),
@@ -38,10 +45,6 @@ const app = document.querySelector("#app"),
   base = new URL(import.meta.env.BASE_URL, document.baseURI).href;
 let save = loadSave(),
   route = "play",
-  chapter = 0,
-  levelPage = 0,
-  themePage = 0,
-  awardPage = 0,
   shopTab = "themes",
   game = null,
   modal = null,
@@ -60,6 +63,11 @@ const boardObserver = new ResizeObserver((entries) => {
   }
 });
 const pausedReasons = new Set();
+configureAudio(base, __MUSIC_FILE__, save.settings.sound);
+document.addEventListener("pointerdown", () => void unlockAudio(), {
+  passive: true,
+});
+document.addEventListener("keydown", () => void unlockAudio());
 let pauseStarted = 0,
   pausedGame = null,
   rewardPending = false;
@@ -303,8 +311,17 @@ function navItem(id, label, ico) {
   return `<button class="nav-item ${route === id || (id === "levels" && route === "play") ? "active" : ""}" data-action="nav:${id}" ${route === id ? 'aria-current="page"' : ""}>${icon(ico)}<span>${label}</span>${id === "daily" && !daily().claimed ? '<i class="nav-dot"></i>' : ""}</button>`;
 }
 let renderRevision = 0;
+const scrollPositions = new Map();
 async function render() {
   const revision = ++renderRevision;
+  const previousMain = app.querySelector("#main");
+  const previousScroll = previousMain?.querySelector(".scroll-list");
+  if (previousScroll)
+    scrollPositions.set(
+      previousMain.dataset.scrollKey,
+      previousScroll.scrollTop,
+    );
+  const scrollKey = route + (route === "shop" ? "." + shopTab : "");
   cancelDrag();
   applyTheme(save.theme);
   document.documentElement.dataset.motion = save.settings.motion ? "on" : "off";
@@ -338,6 +355,9 @@ async function render() {
   );
   if (revision !== renderRevision) return;
   app.replaceChildren(...stage.childNodes);
+  app.querySelector("#main").dataset.scrollKey = scrollKey;
+  const scroller = app.querySelector(".scroll-list");
+  if (scroller) scroller.scrollTop = scrollPositions.get(scrollKey) || 0;
   if (route === "play") {
     fitBoard();
     updateClock();
@@ -375,67 +395,42 @@ function playView() {
     (sprint ? "Время" : "Ходы") +
     '</span><strong id="moves">' +
     (sprint ? '<span id="sprint-clock"></span>' : zen ? "∞" : g.moves) +
-    "</strong></div><div><span>" +
-    (sprint ? "Решено" : zen ? "Ритм" : "Цель") +
-    "</span><strong>" +
-    (sprint ? g.score : zen ? "Свой" : g.level.par) +
-    '</strong></div></div></div><div class="board-slot"><div class="board-frame"><div id="board" class="board" role="group" aria-label="Игровое поле 6 на 6. Выведите целевой блок вправо."><div class="board-cells" aria-hidden="true">' +
+    "</strong></div>" +
+    (g.mode === "campaign"
+      ? ""
+      : "<div><span>" +
+        (sprint ? "Решено" : zen ? "Ритм" : "Цель") +
+        "</span><strong>" +
+        (sprint ? g.score : zen ? "Свой" : g.level.par) +
+        "</strong></div>") +
+    '</div></div><div class="board-slot"><div class="board-frame"><div id="board" class="board" role="group" aria-label="Игровое поле 6 на 6. Выведите целевой блок вправо."><div class="board-cells" aria-hidden="true">' +
     Array.from({ length: 36 }, () => '<i class="board-cell"></i>').join("") +
     '</div><div id="blocks"></div></div><div class="exit-marker">' +
     icon("arrow") +
     '</div></div></div><div class="game-controls">' +
     button(
       "undo",
-      "<span>Отмена</span>",
+      "<span>Отмена</span>" + helperBadge(save.undos),
       "undo",
-      "control-button",
+      "control-button undo-button",
       g.history.length ? "" : "disabled",
     ) +
     button(
       "hint",
-      "<span>Подсказка</span><b>" + save.hints + "</b>",
+      "<span>Подсказка</span>" + helperBadge(save.hints),
       "hint",
       "control-button hint-button",
     ) +
     "</div>" +
-    (sprint
-      ? button("end-sprint", "Завершить", "", "text-button sprint-finish")
-      : "") +
     "</section>"
   );
 }
-function pager(action, page, total, label = "") {
-  return (
-    '<div class="pager">' +
-    button(
-      action + ":" + (page - 1),
-      "",
-      "back",
-      "icon-button",
-      page === 0
-        ? 'disabled aria-label="Предыдущая страница"'
-        : 'aria-label="Предыдущая страница"',
-    ) +
-    "<span>" +
-    (label || page + 1 + " / " + total) +
-    "</span>" +
-    button(
-      action + ":" + (page + 1),
-      "",
-      "arrow",
-      "icon-button",
-      page === total - 1
-        ? 'disabled aria-label="Следующая страница"'
-        : 'aria-label="Следующая страница"',
-    ) +
-    "</div>"
-  );
+function helperBadge(count) {
+  return count
+    ? '<b class="helper-stock">' + count + "</b>"
+    : '<b class="helper-stock ad-badge" aria-label="За рекламу">AD</b>';
 }
 function levelsView() {
-  const levels = data.campaign.slice(
-    chapter * 60 + levelPage * 12,
-    chapter * 60 + levelPage * 12 + 12,
-  );
   return (
     '<div class="content-page levels-page">' +
     pageHeading(
@@ -447,55 +442,43 @@ function levelsView() {
     nextLevel().id +
     "</h2>" +
     button("continue", "Продолжить", "play") +
-    '</div><div class="chapter-picker">' +
-    button(
-      "chapter:" + Math.max(0, chapter - 1),
-      "",
-      "back",
-      "icon-button",
-      chapter === 0
-        ? 'disabled aria-label="Предыдущая глава"'
-        : 'aria-label="Предыдущая глава"',
-    ) +
-    "<h2>" +
-    chapterNames[chapter] +
-    "</h2>" +
-    button(
-      "chapter:" + Math.min(6, chapter + 1),
-      "",
-      "arrow",
-      "icon-button",
-      chapter === 6
-        ? 'disabled aria-label="Следующая глава"'
-        : 'aria-label="Следующая глава"',
-    ) +
-    '</div><div class="levels-grid">' +
-    levels
+    '</div><div class="scroll-list levels-scroll" tabindex="0" aria-label="Список уровней">' +
+    chapterNames
       .map(
-        (l) =>
-          '<button class="level-tile ' +
-          (save.completed[l.id] ? "complete " : "") +
-          (l.id === nextLevel().id ? "current" : "") +
-          '" data-action="level:' +
-          l.id +
-          '" ' +
-          (unlocked(l.id) ? "" : "disabled") +
-          ' aria-label="Уровень ' +
-          l.id +
-          '"><strong>' +
-          l.id +
-          "</strong>" +
-          (unlocked(l.id)
-            ? stars(save.completed[l.id]?.stars || 0)
-            : icon("lock")) +
-          "</button>",
+        (name, chapterIndex) =>
+          '<section class="level-chapter"><h2 class="chapter-title">' +
+          name +
+          '</h2><div class="levels-grid">' +
+          data.campaign
+            .slice(chapterIndex * 60, (chapterIndex + 1) * 60)
+            .map(
+              (l) =>
+                '<button class="level-tile ' +
+                (save.completed[l.id] ? "complete " : "") +
+                (l.id === nextLevel().id ? "current" : "") +
+                '" data-action="level:' +
+                l.id +
+                '" ' +
+                (unlocked(l.id) ? "" : "disabled") +
+                ' aria-label="Уровень ' +
+                l.id +
+                '">' +
+                "<strong>" +
+                l.id +
+                "</strong>" +
+                (unlocked(l.id)
+                  ? stars(save.completed[l.id]?.stars || 0)
+                  : icon("lock")) +
+                "</button>",
+            )
+            .join("") +
+          "</div></section>",
       )
       .join("") +
-    "</div>" +
-    pager("level-page", levelPage, 5) +
-    "</div>"
+    "</div></div>"
   );
 }
+
 function dailyView() {
   const d = daily(),
     ls = dailyLevels(data.extra),
@@ -622,8 +605,47 @@ function miniBoard(theme) {
   );
 }
 function shopView() {
-  const t = themes[themePage],
-    owned = save.owned.includes(t.id);
+  const themeCards = themes
+    .map((t, index) => {
+      const owned = save.owned.includes(t.id);
+      return (
+        '<article class="theme-card panel">' +
+        miniBoard(t) +
+        '<div class="theme-card-content"><h2>' +
+        (owned ? t.name : "Тема " + String(index + 1).padStart(2, "0")) +
+        "</h2><p>" +
+        (owned ? t.tag : "Откройте новый мир") +
+        "</p>" +
+        button(
+          "theme:" + t.id,
+          save.theme === t.id ? "Выбрана" : owned ? "Применить" : coin(t.price),
+          "",
+          "button full",
+          save.theme === t.id ? "disabled" : "",
+        ) +
+        "</div></article>"
+      );
+    })
+    .join("");
+  const boosts = Object.entries(offers)
+    .map(
+      ([kind, offer]) =>
+        '<article class="boost-card panel"><div class="boost-art">' +
+        icon(kind) +
+        "</div><h2>" +
+        offer.name +
+        " ×" +
+        offer.count +
+        "</h2><p>" +
+        offer.desc +
+        '</p><span class="pill">В запасе: ' +
+        save[offer.key] +
+        "</span>" +
+        button("buy:" + kind, coin(offer.price), "", "button full") +
+        rewardButton(kind) +
+        "</article>",
+    )
+    .join("");
   return (
     '<div class="content-page shop-page">' +
     pageHeading(
@@ -640,40 +662,37 @@ function shopView() {
     ) +
     button(
       "shop-tab:boosts",
-      "Подсказки",
+      "Помощь",
       "",
       "button " + (shopTab === "boosts" ? "" : "secondary"),
     ) +
-    "</div>" +
-    (shopTab === "themes"
-      ? '<article class="theme-card panel">' +
-        miniBoard(t) +
-        '<div class="theme-card-content"><h2>' +
-        (owned ? t.name : "Тема " + String(themePage + 1).padStart(2, "0")) +
-        "</h2><p>" +
-        (owned ? t.tag : "Откройте новый мир") +
-        "</p>" +
-        button(
-          "theme:" + t.id,
-          save.theme === t.id ? "Выбрана" : owned ? "Применить" : coin(t.price),
-          "",
-          "button full",
-          save.theme === t.id ? "disabled" : "",
-        ) +
-        "</div></article>" +
-        pager("theme-page", themePage, 5)
-      : '<article class="boost-card panel"><div class="boost-art">' +
-        icon("hint") +
-        '</div><h2>Подсказки ×5</h2><p>Покажут следующий ход</p><span class="pill">В запасе: ' +
-        save.hints +
-        "</span>" +
-        button("buy:hint", coin(90), "", "button full") +
-        rewardButton() +
-        "</article>") +
-    "</div>"
+    '</div><div class="scroll-list shop-scroll" tabindex="0" aria-label="' +
+    (shopTab === "themes" ? "Темы" : "Помощь") +
+    '">' +
+    (shopTab === "themes" ? themeCards : boosts) +
+    "</div></div>"
+  );
+}
+function rewardContents(a) {
+  return (
+    coin(a.reward) +
+    Object.entries(a.bonus || {})
+      .map(
+        ([key, n]) =>
+          '<span class="bonus-inline">' +
+          icon(key === "hints" ? "hint" : "undo") +
+          n +
+          "</span>",
+      )
+      .join("")
   );
 }
 function achievementsView() {
+  const sorted = [...achievements].sort((a, b) => {
+    const rank = (v) =>
+      save.claimed.includes(v.id) ? 2 : v.value(save) >= v.target ? 0 : 1;
+    return rank(a) - rank(b);
+  });
   return (
     '<div class="content-page awards-page">' +
     pageHeading(
@@ -691,9 +710,8 @@ function achievementsView() {
     totalStars() +
     "</strong><span>Звёзд</span></div><div><strong>" +
     currentStreak() +
-    '</strong><span>Дней</span></div></div><div class="achievements-list">' +
-    achievements
-      .slice(awardPage * 2, awardPage * 2 + 2)
+    '</strong><span>Дней</span></div></div><div class="scroll-list achievements-list" tabindex="0" aria-label="Список наград">' +
+    sorted
       .map((a) => {
         const value = Math.min(a.value(save), a.target),
           claimed = save.claimed.includes(a.id),
@@ -705,14 +723,16 @@ function achievementsView() {
           a.name +
           "</h3></div><p>" +
           a.desc +
-          '</p><div class="achievement-bottom"><span>' +
+          '</p><div class="reward-contents">' +
+          rewardContents(a) +
+          '</div><div class="achievement-bottom"><span>' +
           value +
           " / " +
           a.target +
           "</span>" +
           button(
             "achievement:" + a.id,
-            claimed ? "Готово" : ready ? "Забрать" : coin(a.reward),
+            claimed ? "Получено" : "Забрать",
             claimed ? "check" : "",
             "button small " + (ready && !claimed ? "" : "secondary"),
             !ready || claimed ? "disabled" : "",
@@ -721,11 +741,10 @@ function achievementsView() {
         );
       })
       .join("") +
-    "</div>" +
-    pager("award-page", awardPage, 4) +
-    "</div>"
+    "</div></div>"
   );
 }
+
 function fitBoard() {
   boardObserver.disconnect();
   const slot = document.querySelector(".board-slot");
@@ -790,8 +809,13 @@ function refreshGameStats() {
     el.textContent = game.moves;
   const undo = document.querySelector('[data-action="undo"]');
   if (undo) undo.disabled = !game.history.length;
-  const count = document.querySelector(".hint-button b");
-  if (count) count.textContent = save.hints;
+  for (const [kind, field] of [
+    ["hint", "hints"],
+    ["undo", "undos"],
+  ]) {
+    const count = document.querySelector("." + kind + "-button b");
+    if (count) count.outerHTML = helperBadge(save[field]);
+  }
   const restart = document.querySelector('[data-action="restart"]');
   if (restart) restart.disabled = !game.moves;
 }
@@ -820,7 +844,10 @@ function applyMove(index, to, assisted = false) {
 function win() {
   game.won = true;
   if (game.mode !== "sprint") vk.completedLevel(Date.now() - game.startedAt);
-  document.querySelector("#board")?.classList.add("won");
+  document.querySelector(".board-frame")?.classList.add("won");
+  document.querySelectorAll(".block").forEach((el) => {
+    el.disabled = true;
+  });
   if (save.settings.haptic) navigator.vibrate?.([15, 30, 25]);
   playSound("win");
   let result = {
@@ -852,20 +879,26 @@ function win() {
     }
     persist();
     const expected = game;
-    setTimeout(() => {
-      if (game === expected && game.mode === "sprint") {
-        if (Date.now() >= game.deadline) finishSprint();
-        else nextSprint();
-      }
-    }, 420);
+    setTimeout(
+      () => {
+        if (game === expected && game.mode === "sprint") {
+          if (Date.now() >= game.deadline) finishSprint();
+          else nextSprint();
+        }
+      },
+      save.settings.motion ? 800 : 80,
+    );
     return;
   }
   persist();
   const expected = game;
-  setTimeout(() => {
-    if (game !== expected) return;
-    showModal("win", { ...result });
-  }, 280);
+  setTimeout(
+    () => {
+      if (game !== expected || route !== "play") return;
+      showModal("win", { ...result });
+    },
+    save.settings.motion ? 900 : 80,
+  );
 }
 function zenLevel() {
   const pool = data.extra.filter((l) => !save.zen[l.id]);
@@ -961,24 +994,16 @@ async function showModal(type, props = {}) {
         "",
       )}</div>${button("help", "Как играть", "help", "button secondary full")}${game && !game.won ? button("restart", "Заново", "restart", "button secondary full", game.moves ? "" : "disabled") : ""}`;
   if (type === "help")
-    html = `${close}<h2>Как играть</h2><div class="help-demo"><img src="${base}art/${save.theme}/target.webp" alt="">${icon("arrow")}</div><ol class="help-steps"><li>Двигайте блоки вдоль их длины.</li><li>Выведите яркий блок вправо.</li><li>Решите за цель — получите 3 звезды.</li></ol><p class="modal-note">Любое расстояние — один ход. Подсказка: до 2 звёзд. Отмена бесплатна.</p>${button("close-modal", "Понятно", "", "button full")}`;
+    html = `${close}<h2>Как играть</h2><div class="help-demo"><img src="${base}art/${save.theme}/target.webp" alt="">${icon("arrow")}</div><ol class="help-steps"><li>Двигайте блоки вдоль их длины.</li><li>Выведите яркий блок вправо.</li><li>Меньше ходов — больше звёзд.</li></ol><p class="modal-note">Любое расстояние — один ход. Подсказка: до 2 звёзд. Помощь можно получить в магазине.</p>${button("close-modal", "Понятно", "", "button full")}`;
   if (type === "win")
-    html = `<div class="win-emblem">${icon(game.mode === "zen" ? "leaf" : "check")}</div><span class="eyebrow">${game.mode === "campaign" ? `УРОВЕНЬ ${game.level.id} ПРОЙДЕН` : "ПУТЬ СВОБОДЕН"}</span><h2>${game.mode === "zen" ? "И стало чуть тише" : props.stars === 3 ? "Идеальный сдвиг" : props.stars === 2 ? "Красивое решение" : "Получилось!"}</h2>${game.mode === "zen" ? "" : `<div class="win-stars">${stars(props.stars)}</div>`}<div class="win-stats"><div><strong>${game.moves}</strong><span>Ходов</span></div><div><strong>${game.level.par}</strong><span>Цель</span></div><div><strong>+${props.reward}</strong><span>Монет</span></div></div>${game.hints ? '<p class="modal-note">С помощью подсказки · до 2 звёзд</p>' : ""}${button("next", game.mode === "campaign" && game.level.id === 420 ? "Весь путь пройден" : game.mode === "daily" && daily().done.length === 3 ? "Забрать награду" : game.mode === "zen" ? "Ещё момент" : "Дальше", "", "button full")}${button("replay", "Ещё раз", "restart", "text-button")}`;
-  if (type === "hint")
+    html = `<div class="win-emblem">${icon(game.mode === "zen" ? "leaf" : "check")}</div><span class="eyebrow">${game.mode === "campaign" ? `УРОВЕНЬ ${game.level.id} ПРОЙДЕН` : "ПУТЬ СВОБОДЕН"}</span><h2>${game.mode === "zen" ? "И стало чуть тише" : props.stars === 3 ? "Идеальный сдвиг" : props.stars === 2 ? "Красивое решение" : "Получилось!"}</h2>${game.mode === "zen" ? "" : `<div class="win-stars">${stars(props.stars)}</div>`}<div class="win-stats"><div><strong>${game.moves}</strong><span>Ходов</span></div>${game.mode === "campaign" ? "" : "<div><strong>" + game.level.par + "</strong><span>Цель</span></div>"}<div><strong>+${props.reward}</strong><span>Монет</span></div></div>${game.hints ? '<p class="modal-note">С помощью подсказки · до 2 звёзд</p>' : ""}${button("next", game.mode === "campaign" && game.level.id === 420 ? "Весь путь пройден" : game.mode === "daily" && daily().done.length === 3 ? "Забрать награду" : game.mode === "zen" ? "Ещё момент" : "Дальше", "", "button full")}${button("replay", "Ещё раз", "restart", "text-button")}`;
+  if (type === "empty-helper")
     html =
       close +
       '<div class="modal-symbol">' +
-      icon("hint") +
-      '</div><h2>Подсказка</h2><p class="modal-note">Следующий ход · до двух звёзд</p>' +
-      button(
-        "use-hint",
-        "Показать ход ×" + save.hints,
-        "hint",
-        "button full",
-        save.hints ? "" : "disabled",
-      ) +
-      rewardButton() +
-      button("boost-shop", "Пополнить запас", "", "text-button");
+      icon(props.kind) +
+      '</div><h2>Запас закончился</h2><p class="modal-note">Видео за помощь доступно в VK.</p>' +
+      button("boost-shop", "В магазин", "shop", "button full");
   if (type === "confirm")
     html = `${close}<h2>${esc(props.title)}</h2><p class="modal-note">${esc(props.text)}</p>${button(props.action, props.label || "Подтвердить", "", "button full")}${button("close-modal", "Отмена", "", "button secondary full")}`;
   if (type === "theme") {
@@ -1005,28 +1030,42 @@ async function showModal(type, props = {}) {
   );
 }
 
+async function requestHelper(kind, useNow = true) {
+  const field = offers[kind]?.key;
+  if (!field || rewardPending || save[field] >= 9999) return;
+  if (!vk.ready) {
+    showModal("empty-helper", { kind });
+    return;
+  }
+  const expected = game;
+  rewardPending = true;
+  const earned = await vk.reward();
+  rewardPending = false;
+  if (!earned) {
+    toast("Видео недоступно или просмотр не завершён");
+    return;
+  }
+  save[field]++;
+  persist();
+  if (
+    useNow &&
+    game === expected &&
+    route === "play" &&
+    !game?.won &&
+    !modal &&
+    !pausedReasons.size
+  ) {
+    await handle(kind);
+  } else {
+    await render();
+    toast(kind === "hint" ? "+1 подсказка" : "+1 отмена");
+  }
+}
 async function handle(action) {
   if (pausedReasons.size || rewardPending) return;
   const [kind, arg] = action.split(":");
   if (kind === "reward") {
-    const field = { hint: "hints" }[arg];
-    if (!field || !vk.ready || save[field] >= 9999) return;
-    rewardPending = true;
-    const earned = await vk.reward();
-    rewardPending = false;
-    if (earned) {
-      save[field]++;
-      persist();
-      playSound("buy");
-      render();
-      if (modal) showModal(modal.type, modal.props);
-      toast(
-        "+1 " +
-          { hint: "подсказка", auto: "лёгкий шаг", freeze: "запас времени" }[
-            arg
-          ],
-      );
-    } else toast("Видео недоступно или просмотр не завершён");
+    await requestHelper(arg, false);
     return;
   }
   if (kind === "nav") {
@@ -1050,21 +1089,6 @@ async function handle(action) {
   if (kind === "home" || kind === "continue") {
     closeModal();
     openCampaign();
-    return;
-  }
-  if (kind === "chapter") {
-    chapter = Math.max(0, Math.min(6, Number(arg)));
-    levelPage = 0;
-    render();
-    return;
-  }
-  if (kind === "level-page" || kind === "theme-page" || kind === "award-page") {
-    const page = Number(arg);
-    if (!Number.isInteger(page)) return;
-    if (kind === "level-page") levelPage = Math.max(0, Math.min(4, page));
-    if (kind === "theme-page") themePage = Math.max(0, Math.min(4, page));
-    if (kind === "award-page") awardPage = Math.max(0, Math.min(3, page));
-    render();
     return;
   }
   if (kind === "level") {
@@ -1118,12 +1142,19 @@ async function handle(action) {
     navigate("modes");
     return;
   }
-  if (kind === "end-sprint") {
-    finishSprint();
-    return;
-  }
   if (kind === "undo") {
+    if (modal || route !== "play" || !game || game.won || !game.history.length)
+      return;
+    if (game.mode === "sprint" && Date.now() >= game.deadline) {
+      finishSprint();
+      return;
+    }
+    if (!save.undos) {
+      await requestHelper("undo");
+      return;
+    }
     if (game && !game.won && game.history.length) {
+      save.undos--;
       game.state = game.history.pop();
       game.moves--;
       hint = null;
@@ -1159,15 +1190,18 @@ async function handle(action) {
     return;
   }
   if (kind === "hint") {
-    if (game && !game.won) showModal("hint");
-    return;
-  }
-  if (kind === "use-hint") {
+    if (modal || route !== "play" || !game || game.won || busy) return;
+    if (hint) {
+      toast("Подсказка уже на поле");
+      return;
+    }
+    if (!save.hints) {
+      await requestHelper("hint");
+      return;
+    }
     const key = "hints";
     if (busy || !save[key] || !game || game.won) return;
-    closeModal();
     busy = true;
-    toast("Ищем короткий путь…");
     const expected = game,
       state = game.state.join(","),
       path = await findSolution(game);
@@ -1177,7 +1211,8 @@ async function handle(action) {
       game.state.join(",") !== state ||
       game.won ||
       route !== "play" ||
-      modal
+      modal ||
+      pausedReasons.size
     )
       return;
     if (!path?.length) {
@@ -1258,7 +1293,14 @@ async function handle(action) {
       persist();
       render();
       playSound("buy");
-      toast(`+${reward} монет`);
+      const bonus = achievements.find((a) => a.id === arg)?.bonus || {};
+      toast(
+        "+" +
+          reward +
+          " монет" +
+          (bonus.hints ? " · подсказки +" + bonus.hints : "") +
+          (bonus.undos ? " · отмены +" + bonus.undos : ""),
+      );
     }
     return;
   }
@@ -1269,6 +1311,7 @@ async function handle(action) {
   if (kind === "setting") {
     if (!["sound", "haptic", "motion"].includes(arg)) return;
     save.settings[arg] = !save.settings[arg];
+    if (arg === "sound") setAudioEnabled(save.settings.sound);
     persist();
     render();
     showModal("settings");
@@ -1410,6 +1453,7 @@ document.addEventListener("keydown", (e) => {
 window.addEventListener("storage", (e) => {
   if (e.key === SAVE_KEY && e.newValue) {
     save = loadSave();
+    setAudioEnabled(save.settings.sound);
     closeModal();
     game = null;
     if (!restoreGame()) startGame(nextLevel());

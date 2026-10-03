@@ -1,14 +1,30 @@
 import { defineConfig } from "vite";
-import { readdirSync, readFileSync, writeFileSync } from "node:fs";
+import {
+  readdirSync,
+  readFileSync,
+  writeFileSync,
+  existsSync,
+  copyFileSync,
+} from "node:fs";
 import { join } from "node:path";
 import { createHash } from "node:crypto";
+const musicFile = [
+  "public/music.png",
+  "music.png",
+  "public/music.mp3",
+  "music.mp3",
+].find(existsSync);
+const musicName = musicFile?.split("/").at(-1) || null;
 export default defineConfig({
   base: "./",
+  define: { __MUSIC_FILE__: JSON.stringify(musicName) },
   build: { target: "es2020", chunkSizeWarningLimit: 750 },
   plugins: [
     {
       name: "offline-manifest",
       closeBundle() {
+        // A root-level upload is accepted as well as the normal public/ location.
+        if (musicFile) copyFileSync(musicFile, join("dist", musicName));
         const list = [];
         function walk(path = "") {
           for (const entry of readdirSync(join("dist", path), {

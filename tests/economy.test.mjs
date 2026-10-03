@@ -13,6 +13,8 @@ import {
   dailyLevels,
   claimAchievement,
   previousDay,
+  achievements,
+  offers,
 } from "../src/store.js";
 const data = JSON.parse(readFileSync("src/data/levels.json", "utf8"));
 test("first win, replay and improved stars do not duplicate rewards", () => {
@@ -29,11 +31,13 @@ test("purchases are atomic and owned themes cannot be charged twice", () => {
   const s = freshSave();
   assert.equal(buy(s, "orbit"), false);
   assert.equal(s.coins, 150);
+  assert.equal(buy(s, "hint"), false);
+  s.coins = 360;
   assert.equal(buy(s, "hint"), true);
-  assert.equal(s.hints, 8);
+  assert.equal(s.hints, 6);
   assert.equal(s.coins, 60);
   assert.equal(buy(s, "hint"), false);
-  s.coins = 2000;
+  s.coins = 6200;
   assert.equal(buy(s, "grove"), true);
   assert.equal(s.coins, 600);
   assert.equal(buy(s, "grove"), false);
@@ -71,6 +75,7 @@ test("achievements pay once and cannot be claimed before unlock", () => {
   assert.equal(claimAchievement(s, "first"), 0);
   completeCampaign(s, data.campaign[0], 2, 0);
   assert.equal(claimAchievement(s, "first"), 40);
+  assert.equal(s.undos, 7);
   assert.equal(claimAchievement(s, "first"), 0);
 });
 test("save validation and corrupted-storage recovery", () => {
@@ -78,6 +83,8 @@ test("save validation and corrupted-storage recovery", () => {
   assert.ok(validateSave(s));
   for (const change of [
     { coins: -1 },
+    { undos: -1 },
+    { undos: 1.5 },
     { owned: ["invalid"] },
     { completed: { 1: { moves: -1, stars: 3 } } },
     { daily: { x: { done: [], claimed: false } } },
@@ -134,7 +141,57 @@ test("fifty perfect campaign levels cannot buy the entire theme collection", () 
   const s = freshSave();
   for (const l of data.campaign.slice(0, 50)) completeCampaign(s, l, l.par, 0);
   for (const id of ["first", "ten", "perfect"]) claimAchievement(s, id);
-  assert.ok(buy(s, "grove"));
+  for (const a of achievements) claimAchievement(s, a.id);
+  assert.ok(buy(s, "timber"));
+  assert.equal(buy(s, "grove"), false);
   for (const id of ["tide", "ink", "orbit"]) assert.equal(buy(s, id), false);
   assert.equal(s.owned.length, 2);
+});
+
+test("version two receives starter undos once without changing balances or progress", () => {
+  const old = {
+    ...freshSave(),
+    economy: 2,
+    coins: 4321,
+    hints: 17,
+    theme: "orbit",
+    owned: ["studio", "orbit"],
+    completed: { 1: { stars: 3, moves: 2 } },
+  };
+  delete old.undos;
+  let raw = JSON.stringify(old);
+  const storage = {
+    getItem: () => raw,
+    setItem: (_, value) => {
+      raw = value;
+    },
+  };
+  const s = loadSave(storage);
+  assert.equal(s.undos, 5);
+  assert.equal(s.coins, 4321);
+  assert.equal(s.hints, 17);
+  assert.deepEqual(s.completed, old.completed);
+  s.undos = 0;
+  saveData(s, storage);
+  assert.equal(loadSave(storage).undos, 0);
+});
+
+test("undo packs charge exactly once; mixed achievement rewards cannot be farmed", () => {
+  const s = freshSave();
+  s.coins = offers.undo.price;
+  assert.equal(buy(s, "undo"), true);
+  assert.equal(s.coins, 0);
+  assert.equal(s.undos, 10);
+  assert.equal(buy(s, "undo"), false);
+  s.undos = 9998;
+  s.coins = 500;
+  assert.equal(buy(s, "undo"), false);
+  assert.equal(s.coins, 500);
+  s.streak = 7;
+  claimAchievement(s, "week");
+  assert.equal(s.undos, 9999);
+  assert.equal(s.hints, 5);
+  const snapshot = structuredClone(s);
+  assert.equal(claimAchievement(s, "week"), 0);
+  assert.deepEqual(s, snapshot);
 });

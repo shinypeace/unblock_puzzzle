@@ -4,7 +4,7 @@ import sharp from 'sharp';
 
 // Crop generated sprites on their documented cell boundaries. No artwork is
 // synthesized here: transparent source pixels, shading and silhouettes survive.
-const themeNames=['studio','grove','tide','ink','orbit'];
+const themeNames=['studio','grove','tide','ink','orbit','timber','zenith'];
 const names=['target','short-0','short-1','short-2','long-0','long-1','long-2','board','primary','secondary','round','panel','tab-on','tab-off','tile','chest'];
 const manifest={version:2,themes:{},icons:{}};
 async function spriteRegions(source,columns,rows){

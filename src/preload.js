@@ -1,4 +1,5 @@
 // Retain decoded sprites across route changes, including CSS-only surfaces.
+import { themes } from "./themes.js";
 const decoded = [];
 export async function preloadArt(base, progress) {
   const names = [
@@ -56,8 +57,8 @@ export async function preloadArt(base, progress) {
     "toggle-on",
     "toggle-off",
   ];
-  const urls = ["studio", "grove", "tide", "ink", "orbit"]
-    .flatMap((t) => names.map((n) => `${base}art/${t}/${n}.webp`))
+  const urls = themes
+    .flatMap((t) => names.map((n) => `${base}art/${t.id}/${n}.webp`))
     .concat(icons.map((n) => `${base}art/icons/${n}.webp`));
   let cursor = 0,
     complete = 0;

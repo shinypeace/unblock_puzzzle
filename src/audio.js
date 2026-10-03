@@ -1,9 +1,51 @@
 let context,
-  muted = false;
+  muted = false,
+  enabled = true,
+  musicUrl = null,
+  musicLoading = null,
+  musicSource = null;
+export function configureAudio(base, file, value) {
+  musicUrl = file ? new URL(file, base).href : null;
+  enabled = value;
+}
+export function setAudioEnabled(value) {
+  enabled = value;
+  if (!enabled) context?.suspend().catch(() => {});
+  else void unlockAudio();
+}
+export async function unlockAudio() {
+  if (!enabled || muted) return;
+  try {
+    context ||= new (window.AudioContext || window.webkitAudioContext)();
+    await context.resume();
+    if (!musicUrl || musicSource) return;
+    // Decode audio bytes directly: music.png deliberately has an image extension.
+    musicLoading ||= fetch(musicUrl)
+      .then((r) => {
+        if (!r.ok) throw new Error("Music unavailable");
+        return r.arrayBuffer();
+      })
+      .then((bytes) => context.decodeAudioData(bytes))
+      .catch(() => null);
+    const buffer = await musicLoading;
+    if (!buffer || musicSource) return;
+    const gain = context.createGain();
+    gain.gain.value = 0.22;
+    musicSource = context.createBufferSource();
+    musicSource.buffer = buffer;
+    musicSource.loop = true;
+    musicSource.connect(gain);
+    gain.connect(context.destination);
+    musicSource.start();
+    if (muted || !enabled) await context.suspend();
+  } catch {
+    /* Audio may remain blocked until the next user gesture. */
+  }
+}
 export function muteAudio(value) {
   muted = value;
   if (value) context?.suspend().catch(() => {});
-  else context?.resume().catch(() => {});
+  else if (enabled) void unlockAudio();
 }
 export function sound(kind, enabled = true) {
   if (!enabled || muted) return;

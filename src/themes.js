@@ -1,4 +1,4 @@
-// IDs stay stable so purchases and saves from the first version survive.
+// IDs stay stable so purchases and saves survive theme reordering.
 export const themes = [
   {
     id: "studio",
@@ -20,10 +20,48 @@ export const themes = [
     dark: false,
   },
   {
+    id: "timber",
+    name: "Мастерская",
+    tag: "Классика из дерева",
+    price: 2600,
+    colors: [
+      "#785138",
+      "#f5e2bd",
+      "#482b19",
+      "#73503b",
+      "#c19b69",
+      "#51331f",
+      "#9d5431",
+      "#af352c",
+      "#d7a143",
+    ],
+    inset: 10,
+    dark: false,
+  },
+  {
+    id: "zenith",
+    name: "Сад камней",
+    tag: "Спокойствие в деталях",
+    price: 3600,
+    colors: [
+      "#243b31",
+      "#eee9d6",
+      "#263d31",
+      "#546858",
+      "#9aa78b",
+      "#394d42",
+      "#397960",
+      "#c74a3b",
+      "#c0a25a",
+    ],
+    inset: 10,
+    dark: false,
+  },
+  {
     id: "grove",
     name: "Автопарк",
     tag: "Большой выезд",
-    price: 1400,
+    price: 5600,
     colors: [
       "#1d262b",
       "#343b40",
@@ -42,7 +80,7 @@ export const themes = [
     id: "tide",
     name: "Глубина",
     tag: "Подводная экспедиция",
-    price: 2400,
+    price: 8000,
     colors: [
       "#d7f0eb",
       "#efffef",
@@ -61,7 +99,7 @@ export const themes = [
     id: "ink",
     name: "Кондитерская",
     tag: "Сладкий ход",
-    price: 3600,
+    price: 10800,
     colors: [
       "#fbebdf",
       "#fff0d4",
@@ -80,7 +118,7 @@ export const themes = [
     id: "orbit",
     name: "Неон",
     tag: "Заряд на максимум",
-    price: 5200,
+    price: 14000,
     colors: [
       "#070c19",
       "#091625",

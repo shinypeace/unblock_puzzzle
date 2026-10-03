@@ -13,7 +13,8 @@ export const freshSave = () => ({
   version: 1,
   coins: 150,
   hints: 3,
-  economy: 2,
+  undos: 5,
+  economy: 3,
   auto: 0,
   freeze: 0,
   theme: "studio",
@@ -37,6 +38,7 @@ export function validateSave(v) {
     v.version !== 1 ||
     !int(v.coins) ||
     !int(v.hints, 9999) ||
+    (v.undos !== undefined && !int(v.undos, 9999)) ||
     !int(v.auto, 9999) ||
     !int(v.freeze, 9999) ||
     !themes.some((t) => t.id === v.theme) ||
@@ -114,16 +116,18 @@ export function loadSave(storage = localStorage) {
     const parsed = JSON.parse(raw);
     if (validateSave(parsed)) {
       // Refund retired helpers once. Purchases, coins and completed slots survive.
-      if (parsed.economy !== 2) {
+      if (!parsed.economy || parsed.economy < 2) {
         parsed.coins = Math.min(
           1000000,
           parsed.coins + parsed.auto * 40 + parsed.freeze * 20,
         );
         parsed.auto = 0;
         parsed.freeze = 0;
-        parsed.economy = 2;
-        saveData(parsed, storage);
       }
+      // Existing players keep every purchase and receive the same starter undos.
+      if (parsed.undos === undefined) parsed.undos = 5;
+      parsed.economy = 3;
+      saveData(parsed, storage);
       return parsed;
     }
     storage.setItem(SAVE_KEY + ".damaged", raw);
@@ -178,13 +182,26 @@ export function claimDaily(save, day = dayKey()) {
   save.hints++;
   return reward;
 }
+export const offers = {
+  hint: {
+    price: 300,
+    key: "hints",
+    count: 3,
+    name: "Подсказки",
+    desc: "Покажут следующий ход",
+  },
+  undo: {
+    price: 200,
+    key: "undos",
+    count: 5,
+    name: "Отмены",
+    desc: "Вернут последний ход",
+  },
+};
 export function buy(save, item) {
-  const offers = {
-    hint: { price: 90, key: "hints", count: 5 },
-  };
   if (offers[item]) {
     const o = offers[item];
-    if (save.coins < o.price) return false;
+    if (save.coins < o.price || save[o.key] + o.count > 9999) return false;
     save.coins -= o.price;
     save[o.key] += o.count;
     return true;
@@ -205,6 +222,7 @@ export const achievements = [
     target: 1,
     value: (s) => Object.keys(s.completed).length,
     reward: 40,
+    bonus: { undos: 2 },
   },
   {
     id: "ten",
@@ -214,6 +232,7 @@ export const achievements = [
     target: 10,
     value: (s) => Object.keys(s.completed).length,
     reward: 80,
+    bonus: { hints: 1 },
   },
   {
     id: "perfect",
@@ -223,6 +242,7 @@ export const achievements = [
     target: 10,
     value: (s) => s.stats.perfect,
     reward: 100,
+    bonus: { undos: 3 },
   },
   {
     id: "sixty",
@@ -232,6 +252,7 @@ export const achievements = [
     target: 60,
     value: (s) => Object.keys(s.completed).length,
     reward: 160,
+    bonus: { hints: 2 },
   },
   {
     id: "streak",
@@ -241,6 +262,7 @@ export const achievements = [
     target: 3,
     value: (s) => s.streak,
     reward: 120,
+    bonus: { undos: 3 },
   },
   {
     id: "collector",
@@ -259,6 +281,7 @@ export const achievements = [
     target: 5,
     value: (s) => s.sprintBest,
     reward: 150,
+    bonus: { hints: 2 },
   },
   {
     id: "master",
@@ -268,6 +291,107 @@ export const achievements = [
     target: 420,
     value: (s) => Object.keys(s.completed).length,
     reward: 1000,
+    bonus: { hints: 10, undos: 15 },
+  },
+  {
+    id: "twenty-five",
+    name: "Есть маршрут",
+    desc: "Пройти 25 уровней",
+    icon: "arrow",
+    target: 25,
+    value: (s) => Object.keys(s.completed).length,
+    reward: 100,
+    bonus: { undos: 3 },
+  },
+  {
+    id: "perfect-30",
+    name: "Без лишних движений",
+    desc: "30 уровней на 3 звезды",
+    icon: "star",
+    target: 30,
+    value: (s) => s.stats.perfect,
+    reward: 150,
+    bonus: { hints: 2 },
+  },
+  {
+    id: "daily-first",
+    name: "Сегодня получилось",
+    desc: "Забрать первую награду дня",
+    icon: "sun",
+    target: 1,
+    value: (s) => Object.values(s.daily).filter((d) => d.claimed).length,
+    reward: 60,
+    bonus: { undos: 2 },
+  },
+  {
+    id: "daily-ten",
+    name: "Десять хороших дней",
+    desc: "Забрать 10 наград дня",
+    icon: "gift",
+    target: 10,
+    value: (s) => Object.values(s.daily).filter((d) => d.claimed).length,
+    reward: 250,
+    bonus: { hints: 3 },
+  },
+  {
+    id: "week",
+    name: "Неделя сдвигов",
+    desc: "Ежедневный набор 7 дней подряд",
+    icon: "flame",
+    target: 7,
+    value: (s) => s.streak,
+    reward: 300,
+    bonus: { hints: 2, undos: 5 },
+  },
+  {
+    id: "explorer",
+    name: "Другой ритм",
+    desc: "20 новых задач в Дзене и Спринте",
+    icon: "infinity",
+    target: 20,
+    value: (s) => Object.keys(s.zen).length,
+    reward: 150,
+    bonus: { undos: 5 },
+  },
+  {
+    id: "sprint-ten",
+    name: "Скорость мысли",
+    desc: "10 задач за один спринт",
+    icon: "bolt",
+    target: 10,
+    value: (s) => s.sprintBest,
+    reward: 300,
+    bonus: { hints: 3 },
+  },
+  {
+    id: "halfway",
+    name: "Половина пути",
+    desc: "Пройти 210 уровней",
+    icon: "grid",
+    target: 210,
+    value: (s) => Object.keys(s.completed).length,
+    reward: 400,
+    bonus: { hints: 4, undos: 6 },
+  },
+  {
+    id: "perfect-100",
+    name: "Чистая логика",
+    desc: "100 уровней на 3 звезды",
+    icon: "trophy",
+    target: 100,
+    value: (s) => s.stats.perfect,
+    reward: 400,
+    bonus: { hints: 5 },
+  },
+  {
+    id: "all-themes",
+    name: "Семь миров",
+    desc: "Открыть все 7 тем",
+    icon: "palette",
+    target: 7,
+    value: (s) => s.owned.length,
+    reward: 500,
+    bonus: { hints: 5, undos: 10 },
   },
 ];
 export function claimAchievement(save, id) {
@@ -275,6 +399,8 @@ export function claimAchievement(save, id) {
   if (!a || save.claimed.includes(id) || a.value(save) < a.target) return 0;
   save.claimed.push(id);
   save.coins += a.reward;
+  for (const [key, count] of Object.entries(a.bonus || {}))
+    save[key] = Math.min(9999, save[key] + count);
   return a.reward;
 }
 export function applyTheme(id) {

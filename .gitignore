@@ -5,3 +5,4 @@ playwright-report/
 .local/
 *.log
 .DS_Store
+/Превью материалы/

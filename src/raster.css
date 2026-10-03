@@ -15,7 +15,7 @@ body {
   margin: 0;
   overflow: hidden;
   overscroll-behavior: none;
-  touch-action: none;
+  touch-action: pan-y;
   user-select: none;
   -webkit-user-select: none;
   -webkit-touch-callout: none;
@@ -477,14 +477,14 @@ small {
   position: absolute;
   left: 50%;
   top: 50%;
-  width: 94%;
-  height: 88%;
+  width: calc(100% - 6px);
+  height: calc(100% - 6px);
   transform: translate(-50%, -50%);
   object-fit: fill;
 }
 .block-art.vertical {
-  width: calc(88% * var(--length));
-  height: calc(94% / var(--length));
+  width: calc(100% * var(--length) - 6px);
+  height: calc(100% / var(--length) - 6px);
   transform: translate(-50%, -50%) rotate(90deg);
 }
 .block.dragging {
@@ -542,12 +542,7 @@ small {
   color: #fff8ee;
   text-shadow: 0 1px 2px #49250f99;
 }
-.sprint-finish {
-  flex: none;
-  background: var(--surface);
-  border-radius: 12px;
-  align-self: center;
-}
+
 .continue-banner {
   display: flex;
   align-items: center;
@@ -564,18 +559,7 @@ small {
   padding-left: 15px;
   padding-right: 15px;
 }
-.chapter-picker {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 6px;
-  flex: none;
-  background: var(--surface);
-  border-radius: 16px;
-}
-.chapter-picker h2 {
-  font-size: 16px;
-}
+
 .levels-grid {
   flex: 1;
   min-height: 0;
@@ -632,21 +616,7 @@ small {
   opacity: 1;
   filter: none;
 }
-.pager {
-  flex: none;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 20px;
-  height: 40px;
-}
-.pager > span {
-  font-size: 13px;
-  background: var(--surface);
-  border-radius: 10px;
-  padding: 4px 12px;
-  font-weight: 900;
-}
+
 .daily-hero {
   flex: 1;
   min-height: 105px;
@@ -1291,15 +1261,7 @@ small {
     padding: 10px 16px;
     font-size: 11px;
   }
-  .pager {
-    height: 33px;
-  }
-  .pager .icon-button,
-  .chapter-picker .icon-button {
-    width: 33px;
-    height: 33px;
-    padding: 9px;
-  }
+
   .continue-banner {
     padding: 15px 21px;
   }
@@ -1311,9 +1273,7 @@ small {
   .continue-banner h2 {
     font-size: 13px;
   }
-  .chapter-picker h2 {
-    font-size: 13px;
-  }
+
   .level-tile strong {
     font-size: 16px;
   }
@@ -1565,4 +1525,206 @@ small {
 [data-motion="off"] * {
   transition: none !important;
   animation: none !important;
+}
+
+/* These three lists scroll inside the fixed phone shell. The board stays still. */
+.scroll-list {
+  flex: 1;
+  min-height: 0;
+  overflow-y: auto;
+  overflow-x: hidden;
+  overscroll-behavior: contain;
+  touch-action: pan-y;
+  scrollbar-width: thin;
+  scrollbar-color: var(--muted) transparent;
+  padding: 2px 3px 8px;
+  scroll-padding: 8px;
+  -webkit-overflow-scrolling: touch;
+}
+.scroll-list button {
+  touch-action: pan-y;
+}
+.level-chapter + .level-chapter {
+  margin-top: 20px;
+}
+.chapter-title {
+  font-size: 16px;
+  padding: 9px 14px;
+  margin-bottom: 8px;
+  border-radius: 12px;
+  background: var(--surface);
+}
+.levels-scroll .levels-grid {
+  display: grid;
+  grid-template-rows: none;
+  grid-auto-rows: auto;
+  gap: 5px;
+}
+.levels-scroll .level-tile {
+  height: auto;
+  aspect-ratio: 1;
+  width: 100%;
+}
+.levels-scroll .level-tile:disabled {
+  /* Hundreds of filtered surfaces stall scrolling on WebKit. Locks convey state. */
+  filter: none;
+  opacity: 1;
+}
+.shop-scroll {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+.shop-scroll .theme-card {
+  flex: none;
+  height: 330px;
+  padding: 30px;
+  gap: 12px;
+}
+.shop-scroll .theme-card-content h2 {
+  font-size: 22px;
+}
+.shop-scroll .theme-card-content p {
+  font-size: 12px;
+}
+.shop-scroll .boost-card {
+  flex: none;
+  min-height: 300px;
+  padding: 30px;
+  gap: 10px;
+}
+.shop-scroll .boost-art .icon {
+  width: 56px;
+  height: 56px;
+}
+.achievements-list {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+.achievements-list .achievement {
+  flex: none;
+  min-height: 190px;
+  padding: 26px;
+  gap: 8px;
+}
+.achievements-list .achievement h3 {
+  font-size: 16px;
+}
+.achievements-list .achievement p {
+  font-size: 12px;
+}
+.reward-contents {
+  display: flex;
+  gap: 12px;
+  align-items: center;
+  font-size: 13px;
+}
+.bonus-inline {
+  display: inline-flex;
+  gap: 4px;
+  align-items: center;
+  font-weight: 900;
+}
+.reward-contents .icon {
+  width: 20px;
+  height: 20px;
+}
+.helper-stock {
+  flex: none;
+}
+.ad-badge {
+  line-height: 1;
+  font-size: 9px !important;
+  letter-spacing: 0.3px;
+  padding: 4px 3px;
+  border-radius: 4px;
+  color: #fff;
+  background: #295744;
+  text-shadow: none;
+}
+.game-controls .control-button {
+  gap: 5px;
+}
+.game-controls .control-button > .icon {
+  width: 20px;
+  height: 20px;
+}
+[data-theme="timber"] .button:not(.secondary),
+[data-theme="zenith"] .button:not(.secondary) {
+  color: #fff5df;
+  text-shadow: 0 1px 2px #231b15;
+}
+[data-theme="timber"] .nav-item.active {
+  color: #42230f;
+}
+[data-theme="zenith"] .nav-item.active {
+  color: #fff5df;
+}
+.board-frame.won .target-block {
+  z-index: 6;
+  animation: exit-block 720ms cubic-bezier(0.45, 0, 0.65, 1) forwards;
+}
+.board-frame.won .exit-marker {
+  animation: exit-flash 720ms ease-out forwards;
+}
+.board-frame.won:after {
+  content: "";
+  position: absolute;
+  right: 3px;
+  top: calc(30px + (100% - 60px) * 2 / 6);
+  width: 20px;
+  height: calc((100% - 60px) / 6);
+  background: var(--art-cell) center/100% 100%;
+  box-shadow: 0 0 18px var(--target);
+  z-index: 4;
+  pointer-events: none;
+}
+.board-frame.won .block:disabled {
+  opacity: 1;
+  filter: none;
+}
+@keyframes exit-block {
+  0% {
+    transform: translateX(0);
+    opacity: 1;
+  }
+  20% {
+    transform: translateX(-3%);
+    opacity: 1;
+  }
+  80% {
+    opacity: 1;
+  }
+  100% {
+    transform: translateX(calc(100% + 46px));
+    opacity: 0;
+  }
+}
+@keyframes exit-flash {
+  20% {
+    transform: translateY(-50%) scale(1.35);
+    filter: brightness(1.8);
+  }
+  100% {
+    transform: translateY(-50%) scale(0.8);
+    opacity: 0;
+  }
+}
+@media (max-width: 350px) {
+  .game-controls .control-button {
+    padding-inline: 14px;
+    font-size: 11px;
+  }
+  .game-controls .control-button > .icon {
+    width: 18px;
+    height: 18px;
+  }
+  .shop-scroll .theme-card {
+    height: 300px;
+    padding: 27px;
+  }
+  .achievements-list .achievement {
+    padding: 25px;
+  }
 }

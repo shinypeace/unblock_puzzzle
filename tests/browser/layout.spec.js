@@ -2,7 +2,7 @@ import { test, expect } from "@playwright/test";
 import { freshSave, SAVE_KEY } from "../../src/store.js";
 import { readFileSync } from "node:fs";
 const data = JSON.parse(readFileSync("src/data/levels.json", "utf8"));
-const themes = ["studio", "grove", "tide", "ink", "orbit"];
+const themes = ["studio", "grove", "tide", "ink", "orbit", "timber", "zenith"];
 test("first frame is usable before ResizeObserver; its initial notification preserves a drag", async ({
   page,
 }) => {
@@ -43,7 +43,7 @@ test("first frame is usable before ResizeObserver; its initial notification pres
   await expect(page.locator("#moves")).toHaveText("1");
 });
 for (const theme of themes)
-  test(`${theme}: exact cells, static pages and safe panel contents`, async ({
+  test(`${theme}: exact cells, fixed shell and safe panel contents`, async ({
     page,
   }, info) => {
     await page.setViewportSize({ width: 320, height: 568 });
@@ -89,6 +89,14 @@ for (const theme of themes)
           a.bottom > r.bottom + 0.1
         )
           errors.push("art " + i);
+        for (const inset of [
+          a.left - r.left,
+          a.top - r.top,
+          r.right - a.right,
+          r.bottom - a.bottom,
+        ])
+          if (Math.abs(inset - 3) > 0.12)
+            errors.push("uneven piece inset " + i + ": " + inset);
       });
       return { errors, width: b.width, height: b.height };
     }, data.campaign[0]);
@@ -112,7 +120,19 @@ for (const theme of themes)
           .locator('[data-action="nav:' + route + '"]')
           .last()
           .click();
-      await page.waitForTimeout(70);
+      const headings = {
+        levels: "Уровни",
+        daily: null,
+        modes: "Режимы",
+        shop: "Магазин",
+        achievements: "Награды",
+      };
+      if (headings[route])
+        await expect(page.locator("h1")).toHaveText(headings[route]);
+      if (route === "daily")
+        await expect(page.locator(".daily-page")).toBeVisible();
+      if (route === "settings" || route === "help")
+        await expect(page.getByRole("dialog")).toBeVisible();
       const problems = await page.evaluate(() => {
         const issues = [],
           main = document.querySelector("#main"),
@@ -145,6 +165,7 @@ for (const theme of themes)
           }
         }
         for (const el of document.querySelectorAll("#main button,#main h1")) {
+          if (el.closest(".scroll-list")) continue;
           const r = el.getBoundingClientRect();
           if (
             r.top < m.top - 1 ||
