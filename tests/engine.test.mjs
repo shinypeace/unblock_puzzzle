@@ -74,3 +74,30 @@ test("rating respects par and assistance", () => {
   assert.equal(starRating(10, 10, 1), 2);
   assert.equal(starRating(50, 10, 20), 1);
 });
+test("three stars allow a small margin only on longer puzzles", () => {
+  for (const [par, limit] of [
+    [2, 2],
+    [9, 9],
+    [10, 10],
+    [11, 12],
+    [15, 16],
+    [16, 18],
+    [20, 22],
+    [29, 31],
+  ]) {
+    assert.equal(starRating(limit, par), 3, `par ${par}, ${limit} moves`);
+    assert.equal(
+      starRating(limit + 1, par),
+      2,
+      `par ${par}: margin stops at ${limit}`,
+    );
+    assert.equal(
+      starRating(limit, par, 1),
+      2,
+      `par ${par}: hints still cap the rating`,
+    );
+    const twoStarLimit = par + Math.max(3, Math.ceil(par * 0.3));
+    assert.equal(starRating(twoStarLimit, par), 2);
+    assert.equal(starRating(twoStarLimit + 1, par), 1);
+  }
+});

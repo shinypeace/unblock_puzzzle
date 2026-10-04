@@ -27,6 +27,17 @@ test("first win, replay and improved stars do not duplicate rewards", () => {
   assert.equal(s.coins, 194);
   assert.equal(s.stats.perfect, 1);
 });
+test("long-puzzle margin upgrades a prior two-star result and pays only the extra star", () => {
+  const s = freshSave(),
+    l = data.campaign.find((l) => l.par === 20);
+  assert.deepEqual(completeCampaign(s, l, 23, 0), { stars: 2, reward: 36 });
+  assert.deepEqual(completeCampaign(s, l, 22, 0), { stars: 3, reward: 8 });
+  assert.equal(s.stats.perfect, 1);
+  assert.deepEqual(completeCampaign(s, l, 21, 0), { stars: 3, reward: 0 });
+  assert.equal(s.coins, 194);
+  assert.equal(s.stats.perfect, 1);
+  assert.equal(s.completed[l.id].moves, 21);
+});
 test("purchases are atomic and owned themes cannot be charged twice", () => {
   const s = freshSave();
   assert.equal(buy(s, "orbit"), false);
