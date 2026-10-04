@@ -109,9 +109,9 @@ export function validateSave(v) {
     return false;
   return true;
 }
-export function loadSave(storage = localStorage) {
+export function loadSave(storage = localStorage, key = SAVE_KEY) {
   try {
-    const raw = storage.getItem(SAVE_KEY);
+    const raw = storage.getItem(key);
     if (!raw) return freshSave();
     const parsed = JSON.parse(raw);
     if (validateSave(parsed)) {
@@ -127,16 +127,16 @@ export function loadSave(storage = localStorage) {
       // Existing players keep every purchase and receive the same starter undos.
       if (parsed.undos === undefined) parsed.undos = 5;
       parsed.economy = 3;
-      saveData(parsed, storage);
+      saveData(parsed, storage, key);
       return parsed;
     }
-    storage.setItem(SAVE_KEY + ".damaged", raw);
+    storage.setItem(key + ".damaged", raw);
   } catch {}
   return freshSave();
 }
-export function saveData(data, storage = localStorage) {
+export function saveData(data, storage = localStorage, key = SAVE_KEY) {
   try {
-    storage.setItem(SAVE_KEY, JSON.stringify(data));
+    storage.setItem(key, JSON.stringify(data));
     return true;
   } catch {
     return false;

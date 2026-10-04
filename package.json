@@ -9,7 +9,7 @@
     "preview": "vite preview --host 0.0.0.0",
     "generate": "node scripts/generate-levels.mjs",
     "assets": "node scripts/pack-art.mjs && node scripts/pack-surfaces.mjs && node scripts/generate-icons.mjs",
-    "test": "node --test tests/engine.test.mjs tests/economy.test.mjs tests/vk.test.mjs tests/audio.test.mjs",
+    "test": "node --test tests/engine.test.mjs tests/economy.test.mjs tests/vk.test.mjs tests/audio.test.mjs tests/cloud.test.mjs",
     "test:e2e": "playwright test",
     "verify": "npm run test && npm run build && npm run test:e2e"
   },

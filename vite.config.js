@@ -9,10 +9,10 @@ import {
 import { join } from "node:path";
 import { createHash } from "node:crypto";
 const musicFile = [
-  "public/music.png",
-  "music.png",
   "public/music.mp3",
   "music.mp3",
+  "public/music.png",
+  "music.png",
 ].find(existsSync);
 const musicName = musicFile?.split("/").at(-1) || null;
 export default defineConfig({

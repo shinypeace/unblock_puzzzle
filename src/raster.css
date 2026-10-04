@@ -594,13 +594,43 @@ small {
 .level-tile strong {
   font-size: 21px;
   line-height: 1.1;
+  color: var(--level-ink, #16384b);
 }
 .level-tile > .icon {
   width: 15px;
   height: 15px;
 }
 .level-tile.current strong {
-  color: var(--target);
+  color: var(--level-current, #662b19);
+}
+/* Tile artwork has its own surface; it is not the theme's page background. */
+[data-theme="studio"] {
+  --level-ink: #16384b;
+  --level-current: #662b19;
+}
+[data-theme="timber"] {
+  --level-ink: #3c210e;
+  --level-current: #702112;
+}
+[data-theme="zenith"] {
+  --level-ink: #203a2b;
+  --level-current: #732919;
+}
+[data-theme="grove"] {
+  --level-ink: #252d32;
+  --level-current: #861f19;
+}
+[data-theme="tide"] {
+  --level-ink: #052d37;
+  --level-current: #352344;
+}
+[data-theme="ink"] {
+  --level-ink: #502d1d;
+  --level-current: #8a203b;
+}
+[data-theme="orbit"] {
+  --level-ink: #e5faff;
+  --level-current: #fff29a;
 }
 .stars {
   display: inline-flex;

@@ -39,6 +39,7 @@ import {
   setAudioEnabled,
 } from "./audio.js";
 import { VKPlatform, connectVK } from "./vk.js";
+import { CloudSync, accountSave } from "./cloud.js";
 
 const app = document.querySelector("#app"),
   modalRoot = document.querySelector("#modal-root"),
@@ -53,6 +54,12 @@ let save = loadSave(),
   busy = false,
   toastTimer,
   focusBeforeModal;
+let activeSaveKey = SAVE_KEY,
+  cloud = null,
+  booted = false,
+  connecting = null,
+  syncWarning = false,
+  syncRenderTimer;
 let solver = new Worker(new URL("./solver.worker.js", import.meta.url), {
     type: "module",
   }),
@@ -79,6 +86,7 @@ const vk = new VKPlatform({
       height + "px",
     ),
   onReady: () => {
+    if (!booted) return;
     render();
     if (modal) showModal(modal.type, modal.props);
   },
@@ -96,6 +104,7 @@ const vk = new VKPlatform({
     persist();
   },
   onResume: (reason) => {
+    if (reason === "view") void cloud?.sync();
     if (!pausedReasons.has(reason)) return;
     pausedReasons.delete(reason);
     if (!pausedReasons.size) {
@@ -187,7 +196,12 @@ const currentStreak = () =>
 const playSound = (kind) => sound(kind, save.settings.sound);
 function persist() {
   if (game) save.session = serializeGame();
-  if (!saveData(save))
+  try {
+    cloud?.capture(save);
+  } catch {
+    toast("Не удалось сохранить прогресс. Проверьте свободное место.");
+  }
+  if (!saveData(save, localStorage, activeSaveKey))
     toast("Не удалось сохранить прогресс. Проверьте свободное место.");
 }
 function serializeGame() {
@@ -1223,6 +1237,10 @@ async function handle(action) {
       finishSprint();
       return;
     }
+    if (!save[key]) {
+      await requestHelper("hint");
+      return;
+    }
     save[key]--;
     game.hints++;
     hint = path[0];
@@ -1451,8 +1469,9 @@ document.addEventListener("keydown", (e) => {
   }
 });
 window.addEventListener("storage", (e) => {
-  if (e.key === SAVE_KEY && e.newValue) {
-    save = loadSave();
+  if (e.key === activeSaveKey && e.newValue) {
+    save = loadSave(localStorage, activeSaveKey);
+    if (cloud) cloud.last = structuredClone(save);
     setAudioEnabled(save.settings.sound);
     closeModal();
     game = null;
@@ -1466,7 +1485,9 @@ document.addEventListener("visibilitychange", () => {
   if (document.hidden) {
     cancelDrag();
     persist();
+    void cloud?.sync();
   } else {
+    void reconnect();
     if (
       game?.mode === "sprint" &&
       !game.won &&
@@ -1477,6 +1498,101 @@ document.addEventListener("visibilitychange", () => {
     updateClock();
   }
 });
+window.addEventListener("online", () => void reconnect());
+window.addEventListener("focus", () => {
+  if (booted) void reconnect();
+});
+window.addEventListener("pagehide", () => {
+  persist();
+  void cloud?.sync();
+});
+
+function selectAccount(appId, userId) {
+  if (
+    cloud ||
+    !/^[1-9]\d{0,15}$/.test(String(appId)) ||
+    !/^[1-9]\d{0,15}$/.test(String(userId))
+  )
+    return;
+  const profile = accountSave(localStorage, appId, userId);
+  activeSaveKey = profile.key;
+  save = profile.save;
+  cloud = new CloudSync({
+    account: profile.account,
+    save,
+    onApply: (merged, { initial }) => {
+      save = merged;
+      if (game) save.session = serializeGame();
+      saveData(save, localStorage, activeSaveKey);
+      setAudioEnabled(save.settings.sound);
+      if (booted) {
+        if (
+          initial &&
+          game?.mode === "campaign" &&
+          !game.moves &&
+          !drag &&
+          !modal &&
+          save.completed[game.level.id]
+        )
+          startGame(nextLevel());
+        else refreshSyncedUI();
+      }
+    },
+    onStatus: (status) => {
+      if (status === "offline" && !syncWarning) {
+        syncWarning = true;
+        toast("Нет связи с VK. Прогресс сохранён на устройстве.");
+      } else if (status === "saved" && syncWarning) {
+        syncWarning = false;
+        toast("Прогресс синхронизирован");
+      }
+    },
+  });
+  if (booted) {
+    cancelDrag();
+    closeModal();
+    game = null;
+    if (!restoreGame()) startGame(nextLevel());
+    else render();
+  }
+}
+function refreshSyncedUI() {
+  clearTimeout(syncRenderTimer);
+  if (drag || busy || rewardPending) {
+    syncRenderTimer = setTimeout(refreshSyncedUI, 250);
+    return;
+  }
+  render();
+  if (modal) showModal(modal.type, modal.props);
+}
+async function reconnect() {
+  if (connecting) return connecting;
+  connecting = (async () => {
+    const params = new URLSearchParams(location.search);
+    selectAccount(params.get("vk_app_id"), params.get("vk_user_id"));
+    if (!vk.ready && !(await connectVK(vk))) return;
+    if (!cloud && params.has("vk_app_id")) {
+      try {
+        const user = await vk.send("VKWebAppGetUserInfo", {}, 3000);
+        selectAccount(params.get("vk_app_id"), user?.id);
+      } catch {}
+    }
+    if (cloud)
+      await cloud.connect((method, params) => vk.send(method, params, 7000));
+  })();
+  try {
+    await connecting;
+  } catch {
+    // A blocked/full browser store must not leave the whole game on its loader.
+    if (!syncWarning)
+      toast(
+        "Не удалось подключить сохранение VK. Проверьте доступ к хранилищу браузера.",
+      );
+    syncWarning = true;
+  } finally {
+    connecting = null;
+  }
+}
 let lastDay = dayKey();
 setInterval(() => {
   updateClock();
@@ -1488,13 +1604,20 @@ setInterval(() => {
 }, 1000);
 async function boot() {
   try {
-    await preloadArt(base, (n) => {
-      document.querySelector("#loading-progress").textContent = n + "%";
-    });
+    await Promise.all([
+      preloadArt(base, (n) => {
+        document.querySelector("#loading-progress").textContent = n + "%";
+      }),
+      Promise.race([
+        reconnect(),
+        new Promise((resolve) => setTimeout(resolve, 5000)),
+      ]),
+    ]);
+    setAudioEnabled(save.settings.sound);
+    booted = true;
     if (!restoreGame()) startGame(nextLevel());
     else render();
     document.documentElement.dataset.ready = "true";
-    void connectVK(vk);
   } catch {
     app.innerHTML =
       '<div class="loading"><p>Не удалось загрузить игру</p><button onclick="location.reload()">Повторить</button></div>';

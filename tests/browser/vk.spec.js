@@ -30,6 +30,7 @@ test("VK reserves banner space and rewards a completed video once", async ({
     { key: SAVE_KEY, save: { ...freshSave(), hints: 0 } },
   );
   await page.goto("/?vk_app_id=1");
+  await expect(page.locator("#board")).toBeVisible();
   await expect
     .poll(() =>
       page.evaluate(() =>
