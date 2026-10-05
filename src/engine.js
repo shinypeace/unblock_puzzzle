@@ -140,7 +140,7 @@ export function hash(text) {
   return h >>> 0;
 }
 export const threeStarLimit = (par) =>
-  par + (par <= 10 ? 0 : par <= 15 ? 1 : 2);
+  par + (par <= 10 ? 0 : par <= 15 ? 3 : 6);
 export const starRating = (moves, par, hints = 0) =>
   Math.max(
     1,
